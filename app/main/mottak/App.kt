@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
@@ -19,6 +18,8 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import no.nav.aap.kafka.streams.v2.KafkaStreams
+import no.nav.aap.kafka.streams.v2.Streams
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -32,6 +33,7 @@ fun main() {
 
 fun Application.server(
     config: Config = Config(),
+    kafka: Streams = KafkaStreams(),
 ) {
     val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
@@ -48,6 +50,22 @@ fun Application.server(
     install(ContentNegotiation) {
         json()
     }
+
+    environment.monitor.subscribe(ApplicationStopping) {
+        kafka.close()
+    }
+    val joark = JoarkClientImpl(config)
+    val kelvin = BehandlingsflytClientImpl(config)
+    val arena = ArenaClientImpl(config)
+    val gosys = GosysClientImpl(config)
+
+    val topology = createTopology(joark, kelvin, arena, gosys)
+
+    kafka.connect(
+        topology = topology,
+        config = config.kafka,
+        registry = prometheus,
+    )
 
     routing {
         route("/actuator") {

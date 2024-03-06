@@ -14,7 +14,11 @@ application {
 dependencies {
     implementation("com.github.navikt.aap-libs:ktor-auth:$aapLibVersion")
     implementation("com.github.navikt.aap-libs:kafka-2:$aapLibVersion")
+    implementation("com.github.navikt.aap-libs:kafka-avroserde:$aapLibVersion")
+//    implementation("io.confluent:kafka-streams-avro-serde:7.4.0")
     implementation("org.apache.kafka:kafka-clients:3.7.0")
+
+    implementation("no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas:08271806")
 
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -47,6 +51,7 @@ dependencies {
 repositories {
     mavenCentral()
     maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
+    maven("https://packages.confluent.io/maven/")
 }
 
 tasks {

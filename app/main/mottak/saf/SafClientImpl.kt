@@ -11,21 +11,28 @@ import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 import java.util.UUID
 
-class SafClient(private val config: Config) {
+interface SafClient {
+    fun hentJournalpost(journalpostId: String): Journalpost
+}
+
+class SafClientImpl(private val config: Config) : SafClient {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    fun hentJournalpost(journalpostId: String): Journalpost {
+    override fun hentJournalpost(journalpostId: String): Journalpost {
         val journalpost = runBlocking {
             graphqlQuery(SafRequest.hentJournalpost(journalpostId)).data?.journalpostById
                 ?: throw Exception("Fant ikke journalpost for $journalpostId")
         }
 
         return Journalpost(
+            journalpostId = "",
             erMeldekort = false,
             personident = "",
             status = JournalpostStatus.UKJENT,
-            bruker = null
+            bruker = null,
+            erPliktkort = false,
+            skjemanummer = ""
         )
     }
 

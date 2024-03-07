@@ -2,6 +2,7 @@ package mottak
 
 
 data class Journalpost(
+    val journalpostId: String,
     val erMeldekort: Boolean, // TODO Skjemakode = Ny skjemakode for meldekort
     val erPliktkort : Boolean, // (Kelvin)
     val personident: String,

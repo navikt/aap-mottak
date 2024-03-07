@@ -23,7 +23,7 @@ import mottak.behandlingsflyt.BehandlingsflytClientImpl
 import mottak.gosys.GosysClientImpl
 import mottak.joark.JoarkClientImpl
 import mottak.kafka.createTopology
-import mottak.saf.SafClient
+import mottak.saf.SafClientImpl
 import no.nav.aap.kafka.streams.v2.KafkaStreams
 import no.nav.aap.kafka.streams.v2.Streams
 import org.slf4j.Logger
@@ -64,7 +64,7 @@ fun Application.server(
     val kelvin = BehandlingsflytClientImpl(config)
     val arena = ArenaClientImpl(config)
     val gosys = GosysClientImpl(config)
-    val saf = SafClient(config)
+    val saf = SafClientImpl(config)
 
     val topology = createTopology(saf, joark, kelvin, arena, gosys)
 

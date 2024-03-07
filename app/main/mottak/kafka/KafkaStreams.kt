@@ -7,6 +7,7 @@ import mottak.behandlingsflyt.BehandlingsflytClient
 import mottak.gosys.GosysClient
 import mottak.joark.JoarkClient
 import mottak.saf.SafClient
+import mottak.saf.SafClientImpl
 import no.nav.aap.kafka.serde.avro.AvroSerde
 import no.nav.aap.kafka.streams.v2.Topic
 import no.nav.aap.kafka.streams.v2.Topology
@@ -27,7 +28,7 @@ fun createTopology(
     gosys: GosysClient,
 ): Topology =
     topology {
-        consume(journalfoering)
+        consume(Topics.journalfoering)
             .filter { record -> record.mottaksKanal !in IGNORED_MOTTAKSKANAL }
             .filter { record -> record.temaNytt == "AAP" }
             .filter { record -> record.journalpostStatus == "MOTTATT" }
@@ -54,20 +55,8 @@ private fun opprettOppgave(journalpost: Journalpost, gosys: GosysClient, arena: 
     }
 }
 
-private val journalfoering = Topic(
-    name = "teamdokumenthandtering.aapen-dok-journalfoering",
-    valueSerde = joarkAvroSerde(),
-)
-
 private val IGNORED_MOTTAKSKANAL = listOf(
     "EESSI",
     "NAV_NO_CHAT",
     "EKST_OPPS"
 )
-
-private fun joarkAvroSerde(): StreamSerde<JournalfoeringHendelseRecord> =
-    object : StreamSerde<JournalfoeringHendelseRecord> {
-        private val internal = AvroSerde.specific<JournalfoeringHendelseRecord>()
-        override fun serializer(): Serializer<JournalfoeringHendelseRecord> = internal.serializer()
-        override fun deserializer(): Deserializer<JournalfoeringHendelseRecord> = internal.deserializer()
-    }

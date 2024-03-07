@@ -1,8 +1,8 @@
 package mottak
 
-import mottak.lokalkontor.NorgConfig
-import mottak.lokalkontor.PdlConfig
-import mottak.lokalkontor.SkjermingConfig
+import mottak.enhet.NorgConfig
+import mottak.enhet.PdlConfig
+import mottak.enhet.SkjermingConfig
 import no.nav.aap.kafka.schemaregistry.SchemaRegistryConfig
 import no.nav.aap.kafka.streams.v2.config.SslConfig
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig

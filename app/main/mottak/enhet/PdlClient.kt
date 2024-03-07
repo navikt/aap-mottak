@@ -1,4 +1,4 @@
-package mottak.lokalkontor
+package mottak.enhet
 
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -6,9 +6,14 @@ import kotlinx.coroutines.runBlocking
 import mottak.Config
 import mottak.http.HttpClientFactory
 import mottak.http.tryInto
-import mottak.lokalkontor.PdlResponse.Data.GeografiskTilknytning.GTException
+import mottak.graphql.GraphQLError
+import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 import java.net.URI
 import java.util.*
+
+enum class PdlGradering {
+    STRENGT_FORTROLIG, STRENGT_FORTROLIG_UTLAND, FORTROLIG, UGRADERT
+}
 
 data class PdlConfig(
     val host: URI,
@@ -16,22 +21,31 @@ data class PdlConfig(
     val audience: String,
 )
 
-class PdlClient(config: Config) {
+class GTException(msg: String) : RuntimeException(msg)
+
+class PdlClient(private val config: Config) {
     private val httpClient = HttpClientFactory.create()
     private val url = config.pdl.host.toURL()
+    private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    fun hentGTogGradering(personident: String): PdlResponse.Data {
+    fun hentGTogGradering(personident: String): GtOgGradering {
         val query = PdlRequest.hentGtOgGradering(personident)
-        return fetch(query)
+        val data = fetch(query)
+
+        val gradering = PdlGradering.valueOf(data.gradering )
+        val gt = data.geografiskTilknytning
+
+        return GtOgGradering(gradering, gt)
     }
 
     private fun fetch(query: PdlRequest): PdlResponse.Data {
         return runBlocking {
+            val token = tokenProvider.getClientCredentialToken(config.gosys.scope)
             httpClient.post(url) {
                 accept(ContentType.Application.Json)
                 header("Nav-Call-Id", UUID.randomUUID())
                 header("TEMA", "AAP")
-                // bearerAuth(azure.getClientCredential())
+                bearerAuth(token)
                 contentType(ContentType.Application.Json)
                 setBody(query)
             }
@@ -40,6 +54,11 @@ class PdlClient(config: Config) {
         }
     }
 }
+
+data class GtOgGradering(
+    val gradering: PdlGradering,
+    val gt: String
+)
 
 data class PdlRequest(val query: String, val variables: Variables) {
     data class Variables(val ident: String)
@@ -79,26 +98,24 @@ fun PdlResponse.takeDataOrThrow(): PdlResponse.Data {
 
 data class PdlResponse(
     val data: Data?,
-    val errors: List<Error>?,
+    val errors: List<GraphQLError>?,
 ) {
-    val gradering: String
-        get() = data
-            ?.hentPerson
-            ?.adressebeskyttelse
-            ?.singleOrNull()
-            ?.gradering
-            ?: "UGRADERT"
-
-    val geografiskTilknytning: String
-        get() = data
-            ?.hentGeografiskTilknytning
-            ?.tryIntoString()
-            ?: throw GTException("Mangler GT fra PDL response.")
-
     data class Data(
         val hentGeografiskTilknytning: GeografiskTilknytning?,
         val hentPerson: Person?,
     ) {
+        val gradering: String
+            get() = hentPerson
+                ?.adressebeskyttelse
+                ?.singleOrNull()
+                ?.gradering
+                ?: "UGRADERT"
+
+        val geografiskTilknytning: String
+            get() = hentGeografiskTilknytning
+                ?.tryIntoString()
+                ?: throw GTException("Mangler GT fra PDL response.")
+
         data class Person(
             val adressebeskyttelse: List<Adressebeskyttelse>,
             val navn: List<Navn>,
@@ -112,8 +129,6 @@ data class PdlResponse(
             val gtBydel: String?,
             val gtType: Type,
         ) {
-            class GTException(msg: String) : RuntimeException(msg)
-
             enum class Type {
                 KOMMUNE,
                 BYDEL,
@@ -202,15 +217,5 @@ data class PdlResponse(
             val etternavn: String,
             val mellomnavn: String?,
         )
-    }
-
-    data class Error(
-        val message: String,
-        val locations: List<Location>,
-        val path: List<String>?,
-        val extensions: Extensions
-    ) {
-        data class Location(val line: Int?, val column: Int?)
-        data class Extensions(val code: String?, val classification: String)
     }
 }

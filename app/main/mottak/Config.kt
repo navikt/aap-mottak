@@ -1,5 +1,6 @@
 package mottak
 
+import mottak.lokalkontor.NorgConfig
 import mottak.lokalkontor.PdlConfig
 import mottak.lokalkontor.SkjermingConfig
 import no.nav.aap.kafka.schemaregistry.SchemaRegistryConfig
@@ -8,7 +9,7 @@ import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.ktor.client.auth.azure.AzureConfig
 import java.net.URI
 
-private fun getEnvVar(envar: String) = System.getenv(envar) ?: error("missing envvar $envar")
+fun getEnvVar(envar: String) = System.getenv(envar) ?: error("missing envvar $envar")
 
 data class Config(
     val pdl: PdlConfig = PdlConfig(
@@ -18,8 +19,8 @@ data class Config(
     ),
     val skjerming: SkjermingConfig = SkjermingConfig(
         host = getEnvVar("SKJERMING_HOST"),
-
     ),
+    val norg: NorgConfig = NorgConfig(),
     val kafka: StreamsConfig = StreamsConfig(
         brokers = getEnvVar("KAFKA_BROKERS"),
         applicationId = getEnvVar("KAFKA_STREAMS_APPLICATION_ID"),

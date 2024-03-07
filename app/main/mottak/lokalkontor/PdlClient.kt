@@ -1,12 +1,11 @@
 package mottak.lokalkontor
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import mottak.Config
+import mottak.http.HttpClientFactory
+import mottak.http.tryInto
 import mottak.lokalkontor.PdlResponse.Data.GeografiskTilknytning.GTException
 import java.net.URI
 import java.util.*
@@ -18,7 +17,7 @@ data class PdlConfig(
 )
 
 class PdlClient(config: Config) {
-    private val httpClient = HttpClient(CIO) // todo bytt med http client factory
+    private val httpClient = HttpClientFactory.create()
     private val url = config.pdl.host.toURL()
 
     fun hentGTogGradering(personident: String): PdlResponse.Data {
@@ -28,7 +27,7 @@ class PdlClient(config: Config) {
 
     private fun fetch(query: PdlRequest): PdlResponse.Data {
         return runBlocking {
-            val response = httpClient.post(url) {
+            httpClient.post(url) {
                 accept(ContentType.Application.Json)
                 header("Nav-Call-Id", UUID.randomUUID())
                 header("TEMA", "AAP")
@@ -36,20 +35,8 @@ class PdlClient(config: Config) {
                 contentType(ContentType.Application.Json)
                 setBody(query)
             }
-
-            fun PdlResponse.tryIntoData(): PdlResponse.Data {
-                return when (errors.isNullOrEmpty()) {
-                    true -> data ?: error("missing data in pdl response")
-                    false -> error("pdl response has errors: $errors")
-                }
-            }
-
-            when (response.status.value) {
-                in 200..299 -> response.body<PdlResponse>().tryIntoData()
-                in 400..499 -> error("Client error calling PDL ($url): ${response.status}")
-                in 500..599 -> error("Server error calling PDL ($url): ${response.status}")
-                else -> error("Unknown error calling PDL ($url): ${response.status}")
-            }
+                .tryInto<PdlResponse>()
+                .takeDataOrThrow()
         }
     }
 }
@@ -82,6 +69,13 @@ private const val gtOgGradering = """
         }
     }
 """
+
+fun PdlResponse.takeDataOrThrow(): PdlResponse.Data {
+    return when (errors.isNullOrEmpty()) {
+        true -> data ?: error("missing data in pdl response")
+        false -> error("pdl response has errors: $errors")
+    }
+}
 
 data class PdlResponse(
     val data: Data?,

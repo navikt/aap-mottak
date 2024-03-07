@@ -12,14 +12,14 @@ import java.net.URI
 import java.util.*
 
 data class PdlConfig(
-    val url: URI,
+    val host: URI,
     val scope: String,
     val audience: String,
 )
 
 class PdlClient(config: Config) {
     private val httpClient = HttpClient(CIO) // todo bytt med http client factory
-    private val url = config.pdl.url.toURL()
+    private val url = config.pdl.host.toURL()
 
     fun hentGTogGradering(personident: String): PdlResponse.Data {
         val query = PdlRequest.hentGtOgGradering(personident)
@@ -28,7 +28,7 @@ class PdlClient(config: Config) {
 
     private fun fetch(query: PdlRequest): PdlResponse.Data {
         return runBlocking {
-            val request = httpClient.post(url) {
+            val response = httpClient.post(url) {
                 accept(ContentType.Application.Json)
                 header("Nav-Call-Id", UUID.randomUUID())
                 header("TEMA", "AAP")
@@ -44,11 +44,11 @@ class PdlClient(config: Config) {
                 }
             }
 
-            when (request.status.value) {
-                in 200..299 -> request.body<PdlResponse>().tryIntoData()
-                in 400..499 -> error("Client error calling PDL ($url): ${request.status}")
-                in 500..599 -> error("Server error calling PDL ($url): ${request.status}")
-                else -> error("Unknown error calling PDL ($url): ${request.status}")
+            when (response.status.value) {
+                in 200..299 -> response.body<PdlResponse>().tryIntoData()
+                in 400..499 -> error("Client error calling PDL ($url): ${response.status}")
+                in 500..599 -> error("Server error calling PDL ($url): ${response.status}")
+                else -> error("Unknown error calling PDL ($url): ${response.status}")
             }
         }
     }

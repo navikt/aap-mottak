@@ -14,6 +14,7 @@ import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 interface GosysClient {
     fun opprettOppgave(journalpost: Journalpost)
+    fun opprettOppgaveForManglendeIdent(journalpost: Journalpost)
 }
 
 class GosysClientImpl(private val config: Config): GosysClient {
@@ -39,5 +40,9 @@ class GosysClientImpl(private val config: Config): GosysClient {
                 error("Feil mot Oppgave (${response.status}): ${response.bodyAsText()}")
             }
         }
+    }
+
+    override fun opprettOppgaveForManglendeIdent(journalpost: Journalpost) {
+        SECURE_LOG.info("Scanning har ikke klart å lese bruker, manuell behandling")
     }
 }

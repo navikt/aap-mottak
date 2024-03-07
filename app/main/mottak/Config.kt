@@ -1,13 +1,20 @@
 package mottak
 
+import mottak.lokalkontor.PdlConfig
 import no.nav.aap.kafka.schemaregistry.SchemaRegistryConfig
 import no.nav.aap.kafka.streams.v2.config.SslConfig
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.ktor.client.auth.azure.AzureConfig
+import java.net.URI
 
 private fun getEnvVar(envar: String) = System.getenv(envar) ?: error("missing envvar $envar")
 
 data class Config(
+    val pdl: PdlConfig = PdlConfig(
+        url = getEnvVar("PDL_URL").let(::URI),
+        scope = getEnvVar("PDL_SCOPE"),
+        audience = getEnvVar("PDL_AUDIENCE"),
+    ),
     val kafka: StreamsConfig = StreamsConfig(
         brokers = getEnvVar("KAFKA_BROKERS"),
         applicationId = getEnvVar("KAFKA_STREAMS_APPLICATION_ID"),
@@ -38,10 +45,6 @@ data class Config(
         baseUrl = getEnvVar("JOARK_URL"),
         scope = getEnvVar("JOARK_SCOPE")
     ),
-    val pdl: PdlConfig = PdlConfig(
-        baseUrl = getEnvVar("PDL_URL"),
-        scope = getEnvVar("PDL_SCOPE")
-    ),
     val azure: AzureConfig = AzureConfig(),
 )
 
@@ -65,7 +68,3 @@ data class JoarkConfig(
     val scope: String
 )
 
-data class PdlConfig(
-    val baseUrl: String,
-    val scope: String
-)

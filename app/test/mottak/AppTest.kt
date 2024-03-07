@@ -8,9 +8,23 @@ import no.nav.aap.kafka.streams.v2.test.StreamsMock
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
+import uk.org.webcompere.systemstubs.jupiter.SystemStub
+import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension
 
+@ExtendWith(SystemStubsExtension::class)
 class AppTest {
+
+    @SystemStub
+    val environmentVariables = EnvironmentVariables(mapOf(
+        "KAFKA_SCHEMA_REGISTRY" to "mock://kafka",
+        "KAFKA_SCHEMA_REGISTRY_USER" to "",
+        "KAFKA_SCHEMA_REGISTRY_PASSWORD" to "",
+        "KAFKA_TRUSTSTORE_PATH" to "",
+        "KAFKA_KEYSTORE_PATH" to "",
+        "KAFKA_CREDSTORE_PASSWORD" to ""
+    ))
 
     val joark = JoarkClientFake()
     val kelvin = BehandlingsflytClientFake()
@@ -24,7 +38,7 @@ class AppTest {
     )
 
     @Test
-    fun `Test hele greia`() = fakeEnvironment {
+    fun `Test hele greia`() {
         val kafka = StreamsMock()
 
         kafka.connect(
@@ -50,19 +64,5 @@ class AppTest {
         }
 
         Assertions.assertEquals(true, arena.harOpprettetOppgaveMedId("123"))
-    }
-
-
-    private fun fakeEnvironment(block: () -> Unit) {
-        EnvironmentVariables(mapOf(
-            "KAFKA_SCHEMA_REGISTRY" to "mock://kafka",
-            "KAFKA_SCHEMA_REGISTRY_USER" to "",
-            "KAFKA_SCHEMA_REGISTRY_PASSWORD" to "",
-            "KAFKA_TRUSTSTORE_PATH" to "",
-            "KAFKA_KEYSTORE_PATH" to "",
-            "KAFKA_CREDSTORE_PASSWORD" to ""
-        )).execute {
-            block()
-        }
     }
 }

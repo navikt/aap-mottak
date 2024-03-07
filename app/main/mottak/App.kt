@@ -19,8 +19,10 @@ import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import mottak.arena.ArenaClientImpl
+import mottak.behandlingsflyt.BehandlingsflytClientImpl
 import mottak.gosys.GosysClientImpl
 import mottak.joark.JoarkClientImpl
+import mottak.kafka.createTopology
 import mottak.saf.SafClient
 import no.nav.aap.kafka.streams.v2.KafkaStreams
 import no.nav.aap.kafka.streams.v2.Streams

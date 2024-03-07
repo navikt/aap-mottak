@@ -1,4 +1,7 @@
-package mottak
+package mottak.behandlingsflyt
+
+import mottak.Config
+import mottak.Journalpost
 
 interface BehandlingsflytClient {
     fun finnes(journalpost: Journalpost): Boolean

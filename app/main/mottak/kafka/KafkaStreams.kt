@@ -1,6 +1,9 @@
-package mottak
+package mottak.kafka
 
+import mottak.Journalpost
+import mottak.JournalpostStatus
 import mottak.arena.ArenaClient
+import mottak.behandlingsflyt.BehandlingsflytClient
 import mottak.gosys.GosysClient
 import mottak.joark.JoarkClient
 import mottak.saf.SafClient

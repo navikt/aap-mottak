@@ -1,5 +1,9 @@
 package mottak
 
+import mottak.arena.ArenaClient
+import mottak.gosys.GosysClient
+import mottak.joark.JoarkClient
+import mottak.saf.SafClient
 import no.nav.aap.kafka.serde.avro.AvroSerde
 import no.nav.aap.kafka.streams.v2.Topic
 import no.nav.aap.kafka.streams.v2.Topology
@@ -10,6 +14,7 @@ import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serializer
 
 fun createTopology(
+    saf: SafClient,
     joark: JoarkClient,
     kelvin: BehandlingsflytClient,
     arena: ArenaClient,
@@ -20,15 +25,15 @@ fun createTopology(
             .filter { record -> record.mottaksKanal !in IGNORED_MOTTAKSKANAL }
             .filter { record -> record.temaNytt == "AAP" }
             .filter { record -> record.journalpostStatus == "MOTTATT" }
-            .map { _, record -> joark.hentJournalpost(record.journalpostId) }
+            .map { _, record -> saf.hentJournalpost(record.journalpostId.toString()) }
             .filter { journalpost -> journalpost.status != JournalpostStatus.JOURNALFØRT }
             .forEach { _, journalpost ->
                 when {
                     journalpost.erMeldekort -> error("not implemented")
-                    journalpost.bruker == null -> gosys.manuellJournaløring(journalpost)
-                    arena.finnes(journalpost) -> arena.manuellJournaløring(journalpost)
+                    journalpost.bruker == null -> gosys.opprettOppgave(journalpost)
+                    arena.sakFinnes(journalpost) -> arena.opprettOppgave(journalpost)
                     kelvin.finnes(journalpost) -> kelvin.manuellJournaløring(journalpost) // todo: oppgavestyring?
-                    else -> arena.journalføring(journalpost) // todo: kelvin.journaløring(journalpost)
+                    else -> arena.opprettOppgave(journalpost) // todo: kelvin.journaløring(journalpost)
                 }
             }
     }

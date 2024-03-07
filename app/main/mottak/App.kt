@@ -18,6 +18,10 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import mottak.arena.ArenaClientImpl
+import mottak.gosys.GosysClientImpl
+import mottak.joark.JoarkClientImpl
+import mottak.saf.SafClient
 import no.nav.aap.kafka.streams.v2.KafkaStreams
 import no.nav.aap.kafka.streams.v2.Streams
 import org.slf4j.Logger
@@ -58,8 +62,9 @@ fun Application.server(
     val kelvin = BehandlingsflytClientImpl(config)
     val arena = ArenaClientImpl(config)
     val gosys = GosysClientImpl(config)
+    val saf = SafClient(config)
 
-    val topology = createTopology(joark, kelvin, arena, gosys)
+    val topology = createTopology(saf, joark, kelvin, arena, gosys)
 
     kafka.connect(
         topology = topology,

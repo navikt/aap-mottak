@@ -9,7 +9,7 @@ suspend inline fun <reified T : Any> HttpResponse.tryInto(): T {
     when (status.value) {
         in 200..299 -> return body<T>()
         in 400..499 -> throw logWithError("Client error")
-        in 500..599 -> throw logWithError("Server errpr")
+        in 500..599 -> throw logWithError("Server error")
         else -> throw logWithError("Unknown error")
     }
 }

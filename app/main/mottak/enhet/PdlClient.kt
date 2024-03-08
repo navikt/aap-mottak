@@ -29,7 +29,7 @@ class PdlClient(private val config: Config) {
     private val url = config.pdl.host.toURL()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    fun hentGTogGradering(ident: Ident): GtOgGradering {
+    fun hentPersonopplysninger(ident: Ident): Personopplysninger {
         val personident = when (ident) {
             is Ident.Personident -> ident.id
             is Ident.Aktørid -> ident.id
@@ -38,10 +38,11 @@ class PdlClient(private val config: Config) {
         val query = PdlRequest.hentGtOgGradering(personident)
         val data = fetch(query)
 
-        val gradering = PdlGradering.valueOf(data.gradering)
-        val gt = data.geografiskTilknytning
-
-        return GtOgGradering(gradering, gt)
+        return Personopplysninger(
+            personident = data.personident,
+            gradering = PdlGradering.valueOf(data.gradering),
+            gt = data.geografiskTilknytning
+        )
     }
 
     private fun fetch(query: PdlRequest): PdlResponse.Data {
@@ -61,7 +62,8 @@ class PdlClient(private val config: Config) {
     }
 }
 
-data class GtOgGradering(
+data class Personopplysninger(
+    val personident: String,
     val gradering: PdlGradering,
     val gt: String
 )
@@ -91,6 +93,9 @@ private const val gtOgGradering = """
             adressebeskyttelse {
                 gradering
             }
+            folkeregisteridentifikator {
+                identifikasjonsnummer
+            }
         }
     }
 """
@@ -110,6 +115,13 @@ data class PdlResponse(
         val hentGeografiskTilknytning: GeografiskTilknytning?,
         val hentPerson: Person?,
     ) {
+        val personident: String
+            get() = hentPerson
+                ?.folkeregisteridentifikator
+                ?.singleOrNull()
+                ?.identifikasjonsnummer
+                ?: throw GTException("Mangler personidentifikator fra PDL response.")
+
         val gradering: String
             get() = hentPerson
                 ?.adressebeskyttelse
@@ -123,8 +135,13 @@ data class PdlResponse(
                 ?: throw GTException("Mangler GT fra PDL response.")
 
         data class Person(
+            val folkeregisteridentifikator: List<FolkeregisterIdentifikator>,
             val adressebeskyttelse: List<Adressebeskyttelse>,
             val navn: List<Navn>,
+        )
+
+        data class FolkeregisterIdentifikator(
+            val identifikasjonsnummer: String,
         )
 
         data class Adressebeskyttelse(val gradering: String)

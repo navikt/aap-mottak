@@ -5,11 +5,12 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import mottak.Config
+import mottak.Ident
 import mottak.Journalpost
 import mottak.JournalpostStatus
 import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
-import java.util.UUID
+import java.util.*
 
 interface SafClient {
     fun hentJournalpost(journalpostId: String): Journalpost
@@ -25,15 +26,29 @@ class SafClientImpl(private val config: Config) : SafClient {
                 ?: throw Exception("Fant ikke journalpost for $journalpostId")
         }
 
-        return Journalpost(
-            journalpostId = "",
-            erMeldekort = false,
-            personident = "",
-            status = JournalpostStatus.UKJENT,
-            bruker = null,
-            erPliktkort = false,
-            skjemanummer = ""
-        )
+        val ident = when (journalpost.bruker?.type) {
+            SafJournalpost.Ident.IdType.FNR -> Ident.Personident(journalpost.bruker.id)
+            SafJournalpost.Ident.IdType.AKTOERID -> Ident.Aktørid(journalpost.bruker.id)
+            SafJournalpost.Ident.IdType.UKJENT, null -> null
+        }
+
+        return if (ident == null) {
+            Journalpost.UtenIdent(
+                journalpostId = journalpost.journalpostId,
+                erMeldekort = false,
+                status = JournalpostStatus.UKJENT,
+                skjemanummer = ""
+            )
+        } else {
+            Journalpost.MedIdent(
+                journalpostId = journalpost.journalpostId,
+                erMeldekort = false,
+                personident = ident,
+                status = JournalpostStatus.UKJENT,
+                erPliktkort = false,
+                skjemanummer = ""
+            )
+        }
     }
 
     private suspend fun graphqlQuery(query: SafRequest): SafRespons {

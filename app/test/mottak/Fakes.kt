@@ -4,7 +4,6 @@ import mottak.arena.ArenaClient
 import mottak.behandlingsflyt.BehandlingsflytClient
 import mottak.gosys.GosysClient
 import mottak.joark.JoarkClient
-import mottak.kafka.SKJEMANUMMER_SØKNAD
 import mottak.saf.SafClient
 
 class JoarkClientFake : JoarkClient {
@@ -27,11 +26,11 @@ class BehandlingsflytClientFake : BehandlingsflytClient {
 class ArenaClientFake : ArenaClient {
     private val sakliste = mutableListOf<String>()
 
-    override fun sakFinnes(journalpost: Journalpost): Boolean {
+    override fun sakFinnes(journalpost: Journalpost.MedIdent): Boolean {
         return false
     }
 
-    override fun opprettOppgave(journalpost: Journalpost) {
+    override fun opprettOppgave(journalpost: Journalpost.MedIdent) {
         if (sakliste.any { it == journalpost.journalpostId }) error("Oppgave finnes")
         sakliste.add(journalpost.journalpostId)
     }
@@ -43,11 +42,11 @@ class ArenaClientFake : ArenaClient {
 }
 
 class GosysClientFake : GosysClient {
-    override fun opprettOppgave(journalpost: Journalpost) {
+    override fun opprettOppgave(journalpost: Journalpost.MedIdent) {
         TODO("Not yet implemented")
     }
 
-    override fun opprettOppgaveForManglendeIdent(journalpost: Journalpost) {
+    override fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent) {
         TODO("Not yet implemented")
     }
 
@@ -55,13 +54,12 @@ class GosysClientFake : GosysClient {
 
 class SafClientFake : SafClient {
     override fun hentJournalpost(journalpostId: String): Journalpost {
-        return Journalpost(
+        return Journalpost.MedIdent(
             journalpostId = "123",
             erMeldekort = false,
             erPliktkort = false,
-            personident = "1",
+            personident = Ident.Personident("1"),
             status = JournalpostStatus.MOTTATT,
-            bruker = "",
             skjemanummer = SKJEMANUMMER_SØKNAD
         )
     }

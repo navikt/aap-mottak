@@ -4,9 +4,10 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import mottak.Config
+import mottak.Ident
+import mottak.graphql.GraphQLError
 import mottak.http.HttpClientFactory
 import mottak.http.tryInto
-import mottak.graphql.GraphQLError
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 import java.net.URI
 import java.util.*
@@ -28,11 +29,16 @@ class PdlClient(private val config: Config) {
     private val url = config.pdl.host.toURL()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    fun hentGTogGradering(personident: String): GtOgGradering {
+    fun hentGTogGradering(ident: Ident): GtOgGradering {
+        val personident = when (ident) {
+            is Ident.Personident -> ident.id
+            is Ident.Aktørid -> ident.id
+        }
+
         val query = PdlRequest.hentGtOgGradering(personident)
         val data = fetch(query)
 
-        val gradering = PdlGradering.valueOf(data.gradering )
+        val gradering = PdlGradering.valueOf(data.gradering)
         val gt = data.geografiskTilknytning
 
         return GtOgGradering(gradering, gt)

@@ -1,10 +1,10 @@
 package mottak.graphql
 
-internal data class GraphQLExtensions(
+data class GraphQLExtensions(
     val warnings: List<GraphQLWarning>?
 )
 
-internal class GraphQLWarning(
+class GraphQLWarning(
     val query:String?,
     val id:String?,
     val code: String?,

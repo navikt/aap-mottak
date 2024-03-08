@@ -15,7 +15,6 @@ dependencies {
     implementation("com.github.navikt.aap-libs:ktor-auth:$aapLibVersion")
     implementation("com.github.navikt.aap-libs:kafka-2:$aapLibVersion")
     implementation("com.github.navikt.aap-libs:kafka-avroserde:$aapLibVersion")
-//    implementation("io.confluent:kafka-streams-avro-serde:7.4.0")
     implementation("org.apache.kafka:kafka-clients:3.7.0")
 
     implementation("no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas:08271806")
@@ -23,11 +22,6 @@ dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
-    implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
-    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
-    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-server-auth:$ktorVersion")
-    implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
 
     implementation("io.ktor:ktor-client-auth:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")

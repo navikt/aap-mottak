@@ -6,7 +6,7 @@ import mottak.kafka.createTopology
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.test.StreamsMock
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
@@ -14,28 +14,25 @@ import uk.org.webcompere.systemstubs.jupiter.SystemStub
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension
 
 @ExtendWith(SystemStubsExtension::class)
-class AppTest {
+class StreamsTest {
 
     @SystemStub
-    val environmentVariables = EnvironmentVariables(mapOf(
-        "KAFKA_SCHEMA_REGISTRY" to "mock://kafka",
-        "KAFKA_SCHEMA_REGISTRY_USER" to "",
-        "KAFKA_SCHEMA_REGISTRY_PASSWORD" to "",
-        "KAFKA_TRUSTSTORE_PATH" to "",
-        "KAFKA_KEYSTORE_PATH" to "",
-        "KAFKA_CREDSTORE_PASSWORD" to ""
-    ))
-
-    val joark = JoarkClientFake()
-    val kelvin = BehandlingsflytClientFake()
-    val arena = ArenaClientFake()
-    val gosys = GosysClientFake()
-    val saf = SafClientFake()
-
-    val streamsconfig = StreamsConfig(
-        applicationId = "",
-        brokers = ""
+    val env = EnvironmentVariables(
+        mapOf(
+            "KAFKA_SCHEMA_REGISTRY" to "mock://kafka",
+            "KAFKA_SCHEMA_REGISTRY_USER" to "",
+            "KAFKA_SCHEMA_REGISTRY_PASSWORD" to "",
+            "KAFKA_TRUSTSTORE_PATH" to "",
+            "KAFKA_KEYSTORE_PATH" to "",
+            "KAFKA_CREDSTORE_PASSWORD" to ""
+        )
     )
+
+    private val saf = SafClientFake()
+    private val joark = JoarkClientFake()
+    private val kelvin = BehandlingsflytClientFake()
+    private val arena = ArenaClientFake()
+    private val gosys = GosysClientFake()
 
     @Test
     fun `Test hele greia`() {
@@ -43,7 +40,7 @@ class AppTest {
 
         kafka.connect(
             topology = createTopology(saf, joark, kelvin, arena, gosys),
-            config = streamsconfig,
+            config = StreamsConfig("", ""),
             registry = SimpleMeterRegistry(),
         )
 
@@ -63,6 +60,6 @@ class AppTest {
             }.build()
         }
 
-        Assertions.assertEquals(true, arena.harOpprettetOppgaveMedId("123"))
+        assertEquals(true, arena.harOpprettetOppgaveMedId("123"))
     }
 }

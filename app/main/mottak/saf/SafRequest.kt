@@ -26,6 +26,10 @@ private val journalpost = """
                 dato
                 datotype
             }
+            bruker {
+                id
+                type
+            }
             dokumenter {
                 dokumentInfoId
                 brevkode

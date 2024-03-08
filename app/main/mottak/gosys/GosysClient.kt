@@ -5,6 +5,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import mottak.Config
+import mottak.Ident
 import mottak.Journalpost
 import mottak.SECURE_LOG
 import mottak.arena.ArenaOpprettOppgaveParams
@@ -13,22 +14,30 @@ import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 interface GosysClient {
-    fun opprettOppgave(journalpost: Journalpost)
-    fun opprettOppgaveForManglendeIdent(journalpost: Journalpost)
+    fun opprettOppgave(journalpost: Journalpost.MedIdent)
+    fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent)
 }
 
 class GosysClientImpl(private val config: Config): GosysClient {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    override fun opprettOppgave(journalpost: Journalpost) {
+    override fun opprettOppgave(journalpost: Journalpost.MedIdent) {
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.gosys.scope)
+
+            val ident = journalpost.personident.let {
+                when(it) {
+                    is Ident.Personident -> it.id
+                    is Ident.Aktørid -> it.id// todo: Støtter gosys aktørid?
+                }
+            }
+
             val response = httpClient.post("${config.gosys.baseUrl}/opprettoppgave") {
                 accept(ContentType.Application.Json)
                 bearerAuth(token)
                 setBody(ArenaOpprettOppgaveParams(
-                    fnr = Fødselsnummer(journalpost.personident),
+                    fnr = Fødselsnummer(ident),
                     enhet = "",
                     tittel = "Tittel på journalpost",
                     titler = listOf("Vedleggstitler")
@@ -42,7 +51,7 @@ class GosysClientImpl(private val config: Config): GosysClient {
         }
     }
 
-    override fun opprettOppgaveForManglendeIdent(journalpost: Journalpost) {
+    override fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent) {
         SECURE_LOG.info("Scanning har ikke klart å lese bruker, manuell behandling")
     }
 }

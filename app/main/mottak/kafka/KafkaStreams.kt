@@ -31,7 +31,7 @@ fun createTopology(
             .branch({ it is Journalpost.UtenIdent }, håndterUtenIdent(gosys))
             .branch({ it is Journalpost.MedIdent }, håndterMedIdent(kelvin, pdl, arena, gosys))
             .default {
-                it.forEach { key, value ->
+                forEach { key, value ->
                     error("Uhåndter type journalpost for kafka key $key type: ${value::class.simpleName}")
                 }
             }

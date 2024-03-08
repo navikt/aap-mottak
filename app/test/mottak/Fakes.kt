@@ -4,6 +4,9 @@ import mottak.arena.ArenaClient
 import mottak.behandlingsflyt.BehandlingsflytClient
 import mottak.gosys.GosysClient
 import mottak.joark.JoarkClient
+import mottak.pdl.PdlClient
+import mottak.pdl.PdlGradering
+import mottak.pdl.Personopplysninger
 import mottak.saf.SafClient
 
 class JoarkClientFake : JoarkClient {
@@ -65,3 +68,13 @@ class SafClientFake : SafClient {
     }
 }
 
+class PdlClientFake: PdlClient {
+    override fun hentPersonopplysninger(ident: Ident): Personopplysninger {
+        return Personopplysninger(
+            personident = "1",
+            gradering = PdlGradering.UGRADERT,
+            gt = "1234"
+        )
+    }
+
+}

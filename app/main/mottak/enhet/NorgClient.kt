@@ -7,6 +7,7 @@ import mottak.Config
 import mottak.getEnvVar
 import mottak.http.HttpClientFactory
 import mottak.http.tryInto
+import mottak.pdl.PdlGradering
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 data class NorgConfig(

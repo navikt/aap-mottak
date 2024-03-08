@@ -1,21 +1,23 @@
 package mottak.enhet
 
 import mottak.Config
-import mottak.Ident
+import mottak.pdl.Personopplysninger
 
 class EnhetService(config: Config) {
     private val norg = NorgClient(config)
     private val skjerming = SkjermingClient(config)
-    private val pdl = PdlClient(config)
 
-    fun getNavenhetForBruker(ident: Ident): String {
-        val personopplysninger = pdl.hentPersonopplysninger(ident)
-        val personident = personopplysninger.personident
-        val erSkjermet = skjerming.isSkjermet(personident)
-        val enhetsnrListe = norg.hentArbeidsfordeling(personopplysninger.gt, erSkjermet, personopplysninger.gradering)
+    fun getNavEnhet(personopplysninger: Personopplysninger): String {
+        val erSkjermet = skjerming.isSkjermet(personopplysninger.personident)
 
-        if (enhetsnrListe.isEmpty()) error("Fant ingen arbeidsfordeling for $personident")
+        val enhetsnrListe = norg.hentArbeidsfordeling(
+            geografiskOmraade = personopplysninger.gt,
+            skjermet = erSkjermet,
+            gradering = personopplysninger.gradering,
+        )
 
-        return enhetsnrListe.first().enhetNr
+        if (enhetsnrListe.isEmpty()) error("Fant ingen arbeidsfordeling for ${personopplysninger.personident}")
+
+        return enhetsnrListe.first().enhetNr // TODO: er dette riktig api-endepunkt?
     }
 }

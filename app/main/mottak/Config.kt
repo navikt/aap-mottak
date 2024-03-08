@@ -1,8 +1,8 @@
 package mottak
 
 import mottak.enhet.NorgConfig
-import mottak.enhet.PdlConfig
 import mottak.enhet.SkjermingConfig
+import mottak.pdl.PdlConfig
 import no.nav.aap.kafka.schemaregistry.SchemaRegistryConfig
 import no.nav.aap.kafka.streams.v2.config.SslConfig
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig

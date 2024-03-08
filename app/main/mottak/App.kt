@@ -18,6 +18,8 @@ import mottak.behandlingsflyt.BehandlingsflytClientImpl
 import mottak.gosys.GosysClientImpl
 import mottak.joark.JoarkClientImpl
 import mottak.kafka.createTopology
+import mottak.pdl.PdlClient
+import mottak.pdl.PdlClientImpl
 import mottak.saf.SafClientImpl
 import no.nav.aap.kafka.streams.v2.KafkaStreams
 import no.nav.aap.kafka.streams.v2.Streams
@@ -54,11 +56,12 @@ fun Application.server(
 
     val joark = JoarkClientImpl(config)
     val kelvin = BehandlingsflytClientImpl(config)
+    val pdl = PdlClientImpl(config)
     val arena = ArenaClientImpl(config)
     val gosys = GosysClientImpl(config)
     val saf = SafClientImpl(config)
 
-    val topology = createTopology(saf, joark, kelvin, arena, gosys)
+    val topology = createTopology(saf, joark, pdl, kelvin, arena, gosys)
 
     kafka.connect(
         topology = topology,

@@ -3,6 +3,7 @@ package mottak
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import mottak.kafka.Topics
 import mottak.kafka.createTopology
+import mottak.pdl.PdlClient
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.test.StreamsMock
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
@@ -30,6 +31,7 @@ class StreamsTest {
 
     private val saf = SafClientFake()
     private val joark = JoarkClientFake()
+    private val pdl = PdlClientFake()
     private val kelvin = BehandlingsflytClientFake()
     private val arena = ArenaClientFake()
     private val gosys = GosysClientFake()
@@ -39,7 +41,7 @@ class StreamsTest {
         val kafka = StreamsMock()
 
         kafka.connect(
-            topology = createTopology(saf, joark, kelvin, arena, gosys),
+            topology = createTopology(saf, joark, pdl, kelvin, arena, gosys),
             config = StreamsConfig("", ""),
             registry = SimpleMeterRegistry(),
         )

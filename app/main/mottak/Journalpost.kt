@@ -9,7 +9,7 @@ sealed interface Journalpost {
     fun erMeldekort(): Boolean
     fun erSøknadEllerEttersending(): Boolean
 
-    class MedIdent(
+    data class MedIdent(
         val journalpostId: String,
         val erPliktkort: Boolean, // (Kelvin)
         val personident: Ident,

@@ -22,8 +22,14 @@ sealed interface Journalpost {
             return skjemanummer == SKJEMANUMMER_SØKNAD_ETTERSENDING
         }
 
-        override fun erJournalført(): Boolean = status == JournalpostStatus.JOURNALFØRT
-        override fun erMeldekort(): Boolean = erMeldekort
+        override fun erJournalført(): Boolean {
+            return status == JournalpostStatus.JOURNALFØRT
+        }
+
+        override fun erMeldekort(): Boolean {
+            return erMeldekort
+        }
+
         override fun erSøknadEllerEttersending(): Boolean {
             return skjemanummer in listOf(
                 SKJEMANUMMER_SØKNAD,
@@ -39,8 +45,14 @@ sealed interface Journalpost {
         private val status: JournalpostStatus,
         private val skjemanummer: String,
     ) : Journalpost {
-        override fun erJournalført(): Boolean = status == JournalpostStatus.JOURNALFØRT
-        override fun erMeldekort(): Boolean = erMeldekort
+        override fun erJournalført(): Boolean {
+            return status == JournalpostStatus.JOURNALFØRT
+        }
+
+        override fun erMeldekort(): Boolean {
+            return erMeldekort
+        }
+
         override fun erSøknadEllerEttersending(): Boolean {
             return skjemanummer in listOf(
                 SKJEMANUMMER_SØKNAD,

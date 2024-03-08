@@ -59,7 +59,6 @@ class SafClientFake : SafClient {
     override fun hentJournalpost(journalpostId: String): Journalpost {
         return Journalpost.MedIdent(
             journalpostId = "123",
-            erMeldekort = false,
             erPliktkort = false,
             personident = Ident.Personident("1"),
             status = JournalpostStatus.MOTTATT,

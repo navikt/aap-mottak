@@ -9,6 +9,7 @@ import mottak.joark.JoarkClient
 import mottak.pdl.PdlClient
 import mottak.saf.SafClient
 import no.nav.aap.kafka.streams.v2.Topology
+import no.nav.aap.kafka.streams.v2.stream.MappedStream
 import no.nav.aap.kafka.streams.v2.topology
 
 fun createTopology(
@@ -26,27 +27,9 @@ fun createTopology(
             .filter { record -> record.journalpostStatus == "MOTTATT" }
             .map { _, record -> saf.hentJournalpost(record.journalpostId.toString()) }
             .filter { !it.erJournalført() }
-            .filter { !it.erMeldekort() }
             .filter { it.erSøknadEllerEttersending() }
-            .branch({ it is Journalpost.UtenIdent }) {
-                it.forEach { _, journalpost ->
-                    håndterUtenIdent(
-                        journalpost as Journalpost.UtenIdent,
-                        gosys,
-                    )
-                }
-            }
-            .branch({ it is Journalpost.MedIdent }) {
-                it.forEach { _, journalpost ->
-                    håndterMedIdent(
-                        journalpost as Journalpost.MedIdent,
-                        kelvin,
-                        pdl,
-                        arena,
-                        gosys,
-                    )
-                }
-            }
+            .branch({ it is Journalpost.UtenIdent }, håndterUtenIdent(gosys))
+            .branch({ it is Journalpost.MedIdent }, håndterMedIdent(kelvin, pdl, arena, gosys))
             .default {
                 it.forEach { key, value ->
                     error("Uhåndter type journalpost for kafka key $key type: ${value::class.simpleName}")
@@ -54,31 +37,37 @@ fun createTopology(
             }
     }
 
-fun håndterUtenIdent(
-    journalpost: Journalpost.UtenIdent,
+private fun håndterUtenIdent(
     gosys: GosysClient,
-) {
-    gosys.opprettOppgaveForManglendeIdent(journalpost)
+): (MappedStream<Journalpost>) -> Unit = { journalposter ->
+    journalposter.forEach { _, journalpost ->
+        gosys.opprettOppgaveForManglendeIdent(journalpost as Journalpost.UtenIdent)
+    }
 }
 
-fun håndterMedIdent(
-    journalpost: Journalpost.MedIdent,
+private fun håndterMedIdent(
     kelvin: BehandlingsflytClient,
     pdl: PdlClient,
     arena: ArenaClient,
-    gosys: GosysClient,
-) {
-    val personopplysninger = pdl.hentPersonopplysninger(journalpost.personident)
+    gosys: GosysClient
+): (MappedStream<Journalpost>) -> Unit = { journalposter ->
+    journalposter.forEach { _, journalpost ->
 
-    val journalpostMedAktivIdent = journalpost.copy(
-        personident = Ident.Personident(personopplysninger.personident)
-    )
+        val personopplysninger = pdl.hentPersonopplysninger(
+            ident = (journalpost as Journalpost.MedIdent).personident
+        )
 
-    when {
-        journalpostMedAktivIdent.erPliktkort -> error("not implemented")
-        arena.sakFinnes(journalpostMedAktivIdent) -> opprettOppgave(journalpostMedAktivIdent, gosys, arena)
-        kelvin.finnes(journalpostMedAktivIdent) -> kelvin.manuellJournaløring(journalpostMedAktivIdent)
-        else -> arena.opprettOppgave(journalpostMedAktivIdent)
+        val journalpostMedAktivIdent = journalpost.copy(
+            personident = Ident.Personident(personopplysninger.personident)
+        )
+
+        when {
+            journalpostMedAktivIdent.erPliktkort -> error("not implemented")
+            arena.sakFinnes(journalpostMedAktivIdent) -> opprettOppgave(journalpostMedAktivIdent, gosys, arena)
+            kelvin.finnes(journalpostMedAktivIdent) -> kelvin.manuellJournaløring(journalpostMedAktivIdent)
+            else -> arena.opprettOppgave(journalpostMedAktivIdent)
+        }
+
     }
 }
 

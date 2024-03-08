@@ -6,14 +6,12 @@ const val SKJEMANUMMER_SØKNAD_ETTERSENDING = "NAVe 11-13.05"
 sealed interface Journalpost {
 
     fun erJournalført(): Boolean
-    fun erMeldekort(): Boolean
     fun erSøknadEllerEttersending(): Boolean
 
     data class MedIdent(
         val journalpostId: String,
         val erPliktkort: Boolean, // (Kelvin)
         val personident: Ident,
-        private val erMeldekort: Boolean, // TODO Skjemakode = Ny skjemakode for meldekort
         private val status: JournalpostStatus,
         private val skjemanummer: String,
     ) : Journalpost {
@@ -24,10 +22,6 @@ sealed interface Journalpost {
 
         override fun erJournalført(): Boolean {
             return status == JournalpostStatus.JOURNALFØRT
-        }
-
-        override fun erMeldekort(): Boolean {
-            return erMeldekort
         }
 
         override fun erSøknadEllerEttersending(): Boolean {
@@ -41,16 +35,11 @@ sealed interface Journalpost {
 
     class UtenIdent(
         val journalpostId: String,
-        private val erMeldekort: Boolean, // TODO Skjemakode = Ny skjemakode for meldekort
         private val status: JournalpostStatus,
         private val skjemanummer: String,
     ) : Journalpost {
         override fun erJournalført(): Boolean {
             return status == JournalpostStatus.JOURNALFØRT
-        }
-
-        override fun erMeldekort(): Boolean {
-            return erMeldekort
         }
 
         override fun erSøknadEllerEttersending(): Boolean {

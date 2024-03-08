@@ -35,14 +35,12 @@ class SafClientImpl(private val config: Config) : SafClient {
         return if (ident == null) {
             Journalpost.UtenIdent(
                 journalpostId = journalpost.journalpostId,
-                erMeldekort = false,
                 status = JournalpostStatus.UKJENT,
                 skjemanummer = ""
             )
         } else {
             Journalpost.MedIdent(
                 journalpostId = journalpost.journalpostId,
-                erMeldekort = false,
                 personident = ident,
                 status = JournalpostStatus.UKJENT,
                 erPliktkort = false,

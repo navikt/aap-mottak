@@ -18,6 +18,7 @@ class JoarkClientImpl(private val config: Config) : JoarkClient {
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun ferdigstill(journalpostId: Long) {
+        // TODO: Oppdater med behandlende enhet og fagsak
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.joark.scope)
             val response =

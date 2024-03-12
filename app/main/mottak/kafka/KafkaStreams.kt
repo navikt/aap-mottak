@@ -67,7 +67,6 @@ private fun håndterMedIdent(
             kelvin.finnes(journalpostMedAktivIdent) -> kelvin.manuellJournaløring(journalpostMedAktivIdent)
             else -> arena.opprettOppgave(journalpostMedAktivIdent)
         }
-
     }
 }
 

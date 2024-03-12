@@ -16,24 +16,28 @@ interface ArenaClient {
     fun opprettOppgave(journalpost: Journalpost.MedIdent)
 }
 
-class ArenaClientImpl(private val config: Config): ArenaClient {
+class ArenaClientImpl(private val config: Config) : ArenaClient {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun sakFinnes(journalpost: Journalpost.MedIdent): Boolean {
         return runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.fssProxy.scope)
+            val ident = when (journalpost.personident) {
+                is Ident.Aktørid -> error("AktørID er ikke støttet i Oppgave")
+                is Ident.Personident -> journalpost.personident.id
+            }
+
             val response = httpClient.get("${config.fssProxy.baseUrl}/vedtak") {
                 accept(ContentType.Application.Json)
-                header("personident", journalpost.personident)
+                header("personident", ident)
                 bearerAuth(token)
             }
-            if (response.status.isSuccess()) {
-                true
-            } else if (response.status.value == 404){
-                false
-            } else {
-                error("Feil mot arena (${response.status}): ${response.bodyAsText()}")
+
+            when {
+                response.status.isSuccess() -> true
+                response.status == HttpStatusCode.NotFound -> false
+                else -> error("Feil mot arena (${response.status}): ${response.bodyAsText()}")
             }
         }
     }
@@ -41,22 +45,22 @@ class ArenaClientImpl(private val config: Config): ArenaClient {
     override fun opprettOppgave(journalpost: Journalpost.MedIdent) {
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.fssProxy.scope)
-            val ident = journalpost.personident.let {
-                when(it) {
-                    is Ident.Personident -> it.id
-                    is Ident.Aktørid -> it.id// todo: Støtter arena aktørid?
-                }
+            val ident = when (journalpost.personident) {
+                is Ident.Aktørid -> error("AktørID er ikke støttet i Oppgave")
+                is Ident.Personident -> journalpost.personident.id
             }
             val response = httpClient.post("${config.fssProxy.baseUrl}/opprettoppgave") {
                 accept(ContentType.Application.Json)
                 header("personident", journalpost.personident)
                 bearerAuth(token)
-                setBody(ArenaOpprettOppgaveParams(
-                    fnr = Fødselsnummer(ident),
-                    enhet = "",
-                    tittel = "Tittel på journalpost",
-                    titler = listOf("Vedleggstitler")
-                ))
+                setBody(
+                    ArenaOpprettOppgaveParams(
+                        fnr = Fødselsnummer(ident),
+                        enhet = "",
+                        tittel = "Tittel på journalpost",
+                        titler = listOf("Vedleggstitler")
+                    )
+                )
             }
             if (response.status.isSuccess()) {
                 SECURE_LOG.info("Opprettet oppgave i Arena for ${journalpost.personident}")
@@ -67,6 +71,11 @@ class ArenaClientImpl(private val config: Config): ArenaClient {
     }
 }
 
-data class ArenaOpprettOppgaveParams(val fnr : Fødselsnummer, val enhet : String, val tittel : String, val titler : List<String> = emptyList())
+data class ArenaOpprettOppgaveParams(
+    val fnr: Fødselsnummer,
+    val enhet: String,
+    val tittel: String,
+    val titler: List<String> = emptyList(),
+)
 
-data class Fødselsnummer(val fnr : String)
+data class Fødselsnummer(val fnr: String)

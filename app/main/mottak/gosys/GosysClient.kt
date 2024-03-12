@@ -18,30 +18,29 @@ interface GosysClient {
     fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent)
 }
 
-class GosysClientImpl(private val config: Config): GosysClient {
+class GosysClientImpl(private val config: Config) : GosysClient {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun opprettOppgave(journalpost: Journalpost.MedIdent) {
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.gosys.scope)
-
-            val ident = journalpost.personident.let {
-                when(it) {
-                    is Ident.Personident -> it.id
-                    is Ident.Aktørid -> it.id// todo: Støtter gosys aktørid?
-                }
+            val ident = when (journalpost.personident) {
+                is Ident.Aktørid -> error("AktørID er ikke støttet i Oppgave")
+                is Ident.Personident -> journalpost.personident.id
             }
 
             val response = httpClient.post("${config.gosys.baseUrl}/opprettoppgave") {
                 accept(ContentType.Application.Json)
                 bearerAuth(token)
-                setBody(ArenaOpprettOppgaveParams(
-                    fnr = Fødselsnummer(ident),
-                    enhet = "",
-                    tittel = "Tittel på journalpost",
-                    titler = listOf("Vedleggstitler")
-                ))
+                setBody(
+                    ArenaOpprettOppgaveParams(
+                        fnr = Fødselsnummer(ident),
+                        enhet = "",
+                        tittel = "Tittel på journalpost",
+                        titler = listOf("Vedleggstitler")
+                    )
+                )
             }
             if (response.status.isSuccess()) {
                 SECURE_LOG.info("Opprettet oppgave i Oppgave for ${journalpost.personident}")

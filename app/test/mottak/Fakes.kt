@@ -1,22 +1,25 @@
 package mottak
 
-import mottak.arena.ArenaClient
-import mottak.behandlingsflyt.BehandlingsflytClient
-import mottak.gosys.GosysClient
-import mottak.joark.JoarkClient
-import mottak.pdl.PdlClient
+import mottak.arena.Arena
+import mottak.behandlingsflyt.Behandlingsflyt
+import mottak.enhet.ArbeidsfordelingDtoResponse
+import mottak.enhet.Norg
+import mottak.enhet.Skjerming
+import mottak.gosys.Gosys
+import mottak.joark.Joark
+import mottak.pdl.Pdl
 import mottak.pdl.PdlGradering
 import mottak.pdl.Personopplysninger
-import mottak.saf.SafClient
+import mottak.saf.Saf
 
-class JoarkClientFake : JoarkClient {
+object JoarkFake : Joark {
     override fun ferdigstill(journalpostId: Long) {
         TODO("Not yet implemented")
     }
 }
 
-class BehandlingsflytClientFake : BehandlingsflytClient {
-    override fun finnes(journalpost: Journalpost): Boolean {
+object BehandlingsflytFake : Behandlingsflyt {
+    override fun finnesSak(journalpost: Journalpost): Boolean {
         return false
     }
 
@@ -26,25 +29,45 @@ class BehandlingsflytClientFake : BehandlingsflytClient {
 
 }
 
-class ArenaClientFake : ArenaClient {
-    private val sakliste = mutableListOf<String>()
+object SkjermingFake : Skjerming {
+    override fun isSkjermet(personident: Ident.Personident): Boolean {
+        return false
+    }
+}
 
-    override fun sakFinnes(journalpost: Journalpost.MedIdent): Boolean {
+object NorgFake : Norg {
+    override fun hentArbeidsfordeling(
+        geografiskOmraade: String,
+        skjermet: Boolean,
+        gradering: PdlGradering
+    ): List<ArbeidsfordelingDtoResponse> {
+        return listOf(
+            ArbeidsfordelingDtoResponse(enhetNr = "oslo")
+        )
+    }
+}
+
+object ArenaFake : Arena {
+    private val saker = mutableListOf<String>()
+
+    override fun finnesSak(journalpost: Journalpost.MedIdent): Boolean {
         return false
     }
 
     override fun opprettOppgave(journalpost: Journalpost.MedIdent) {
-        if (sakliste.any { it == journalpost.journalpostId }) error("Oppgave finnes")
-        sakliste.add(journalpost.journalpostId)
+        if (saker.any { it == journalpost.journalpostId }) error("Oppgave finnes")
+        saker.add(journalpost.journalpostId)
     }
 
     fun harOpprettetOppgaveMedId(id: String): Boolean {
-        return sakliste.any { it == id}
+        return saker.any { it == id }
     }
 
 }
 
-class GosysClientFake : GosysClient {
+object GosysFake : Gosys {
+    private val oppgaver = mutableListOf<Pair<String, String>>()
+
     override fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent) {
         TODO("Not yet implemented")
     }
@@ -54,12 +77,15 @@ class GosysClientFake : GosysClient {
     }
 
     override fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhetsnummer: String) {
-        TODO("Not yet implemented")
+        oppgaver.add(journalpost.journalpostId to enhetsnummer)
     }
 
+    fun harOpprettetOppgave(id: String, enhet: String): Boolean {
+        return oppgaver.any { it.first == id && it.second == enhet }
+    }
 }
 
-class SafClientFake : SafClient {
+object SafFake : Saf {
     override fun hentJournalpost(journalpostId: String): Journalpost {
         return Journalpost.MedIdent(
             journalpostId = "123",
@@ -71,7 +97,7 @@ class SafClientFake : SafClient {
     }
 }
 
-class PdlClientFake: PdlClient {
+object PdlFake : Pdl {
     override fun hentPersonopplysninger(ident: Ident): Personopplysninger {
         return Personopplysninger(
             personident = Ident.Personident("1"),

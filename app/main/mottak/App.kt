@@ -10,13 +10,16 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import mottak.arena.ArenaClientImpl
-import mottak.behandlingsflyt.BehandlingsflytClientImpl
-import mottak.gosys.GosysClientImpl
-import mottak.joark.JoarkClientImpl
+import mottak.arena.ArenaClient
+import mottak.behandlingsflyt.BehandlingsflytClient
+import mottak.enhet.EnhetService
+import mottak.enhet.NorgClient
+import mottak.enhet.SkjermingClient
+import mottak.gosys.GosysClient
+import mottak.joark.JoarkClient
 import mottak.kafka.MottakTopology
-import mottak.pdl.PdlClientImpl
-import mottak.saf.SafClientImpl
+import mottak.pdl.PdlClient
+import mottak.saf.SafClient
 import no.nav.aap.kafka.streams.v2.KafkaStreams
 import no.nav.aap.kafka.streams.v2.Streams
 import org.slf4j.Logger
@@ -45,14 +48,18 @@ fun Application.server(
         kafka.close()
     }
 
-    val joark = JoarkClientImpl(config)
-    val kelvin = BehandlingsflytClientImpl(config)
-    val pdl = PdlClientImpl(config)
-    val arena = ArenaClientImpl(config)
-    val gosys = GosysClientImpl(config)
-    val saf = SafClientImpl(config)
-
-    val topology = MottakTopology(saf, joark, pdl, kelvin, arena, gosys)
+    val topology = MottakTopology(
+        joark = JoarkClient(config),
+        kelvin = BehandlingsflytClient(config),
+        pdl = PdlClient(config),
+        arena = ArenaClient(config),
+        gosys = GosysClient(config),
+        saf = SafClient(config),
+        enhetService = EnhetService(
+            norg = NorgClient(config),
+            skjerming = SkjermingClient(config),
+        ),
+    )
 
     kafka.connect(
         topology = topology(),

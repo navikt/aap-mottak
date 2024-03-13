@@ -12,11 +12,15 @@ data class SkjermingConfig(
     val host: String,
 )
 
-class SkjermingClient(config: Config) {
+interface Skjerming {
+    fun isSkjermet(personident: Ident.Personident): Boolean
+}
+
+class SkjermingClient(config: Config): Skjerming {
     private val httpClient = HttpClientFactory.create()
     private val host: String = config.skjerming.host
 
-    fun isSkjermet(personident: Ident.Personident): Boolean {
+    override fun isSkjermet(personident: Ident.Personident): Boolean {
         val body = SkjermingReq(personident.id)
 
         return runBlocking {

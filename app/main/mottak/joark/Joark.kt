@@ -9,11 +9,11 @@ import mottak.SECURE_LOG
 import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
-interface JoarkClient {
+interface Joark {
     fun ferdigstill(journalpostId: Long)
 }
 
-class JoarkClientImpl(private val config: Config) : JoarkClient {
+class JoarkClient(private val config: Config) : Joark {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 

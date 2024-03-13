@@ -14,12 +14,16 @@ data class NorgConfig(
     val host: String = getEnvVar("NORG_HOST"),
 )
 
-class NorgClient(private val config: Config) {
+interface Norg {
+    fun hentArbeidsfordeling(geografiskOmraade: String, skjermet: Boolean, gradering: PdlGradering): List<ArbeidsfordelingDtoResponse>
+}
+
+class NorgClient(private val config: Config) : Norg {
     private val host: String = config.norg.host
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    fun hentArbeidsfordeling(geografiskOmraade: String, skjermet: Boolean, gradering: PdlGradering): List<ArbeidsfordelingDtoResponse> {
+    override fun hentArbeidsfordeling(geografiskOmraade: String, skjermet: Boolean, gradering: PdlGradering): List<ArbeidsfordelingDtoResponse> {
         val request = ArbeidsfordelingDtoRequest(
             geografiskOmraade = geografiskOmraade,
             skjermet = skjermet,

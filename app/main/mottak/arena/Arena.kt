@@ -11,16 +11,16 @@ import mottak.SECURE_LOG
 import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
-interface ArenaClient {
-    fun sakFinnes(journalpost: Journalpost.MedIdent): Boolean
+interface Arena {
+    fun finnesSak(journalpost: Journalpost.MedIdent): Boolean
     fun opprettOppgave(journalpost: Journalpost.MedIdent)
 }
 
-class ArenaClientImpl(private val config: Config) : ArenaClient {
+class ArenaClient(private val config: Config) : Arena {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    override fun sakFinnes(journalpost: Journalpost.MedIdent): Boolean {
+    override fun finnesSak(journalpost: Journalpost.MedIdent): Boolean {
         return runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.fssProxy.scope)
             val ident = when (journalpost.personident) {

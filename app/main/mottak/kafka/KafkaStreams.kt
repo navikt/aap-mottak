@@ -1,12 +1,14 @@
 package mottak.kafka
 
 import mottak.Journalpost
-import mottak.arena.ArenaClient
-import mottak.behandlingsflyt.BehandlingsflytClient
-import mottak.gosys.GosysClient
-import mottak.joark.JoarkClient
-import mottak.pdl.PdlClient
-import mottak.saf.SafClient
+import mottak.arena.Arena
+import mottak.behandlingsflyt.Behandlingsflyt
+import mottak.enhet.EnhetService
+import mottak.gosys.Gosys
+import mottak.joark.Joark
+import mottak.pdl.Pdl
+import mottak.pdl.Personopplysninger
+import mottak.saf.Saf
 import no.nav.aap.kafka.streams.v2.Topology
 import no.nav.aap.kafka.streams.v2.topology
 
@@ -17,12 +19,13 @@ private val IGNORED_MOTTAKSKANAL = listOf(
 )
 
 class MottakTopology(
-    private val saf: SafClient,
-    private val joark: JoarkClient,
-    private val pdl: PdlClient,
-    private val kelvin: BehandlingsflytClient,
-    private val arena: ArenaClient,
-    private val gosys: GosysClient,
+    private val saf: Saf,
+    private val joark: Joark,
+    private val pdl: Pdl,
+    private val kelvin: Behandlingsflyt,
+    private val arena: Arena,
+    private val gosys: Gosys,
+    private val enhetService: EnhetService,
 ) {
     operator fun invoke(): Topology = topology {
         consume(Topics.journalfoering)
@@ -58,22 +61,23 @@ class MottakTopology(
 
         when {
             journalpost.erPliktkort() -> error("not implemented")
-            arena.sakFinnes(journalpost) -> gosys.opprettManuellJournalføringsoppgave(journalpost)
-            kelvin.finnes(journalpost) -> kelvin.manuellJournaløring(journalpost)
-            else -> sakIkkeFunnet(journalpost, personopplysninger.gt)
+            arena.finnesSak(journalpost) -> gosys.opprettManuellJournalføringsoppgave(journalpost)
+            kelvin.finnesSak(journalpost) -> kelvin.manuellJournaløring(journalpost)
+            else -> sakIkkeFunnet(journalpost, personopplysninger)
         }
     }
 
-    private fun sakIkkeFunnet(journalpost: Journalpost.MedIdent, navenhet: String) {
+    private fun sakIkkeFunnet(journalpost: Journalpost.MedIdent, opplysninger: Personopplysninger) {
         when {
             journalpost.erEttersending() -> gosys.opprettManuellJournalføringsoppgave(journalpost)
-            journalpost.erSøknad() -> arenaOppgave(journalpost, navenhet)
+            journalpost.erSøknad() -> arenaOppgave(journalpost, opplysninger)
             else -> error("Ukjent hva man skal gjøre")
         }
     }
 
-    private fun arenaOppgave(journalpost: Journalpost.MedIdent, navenhet: String) {
+    private fun arenaOppgave(journalpost: Journalpost.MedIdent, opplysninger: Personopplysninger) {
         val saksnummer = arena.opprettOppgave(journalpost)
-        gosys.opprettAutomatiskJournalføringsoppgave(journalpost, navenhet)
+        val enhet = enhetService.getNavEnhet(opplysninger)
+        gosys.opprettAutomatiskJournalføringsoppgave(journalpost, enhet)
     }
 }

@@ -1,12 +1,11 @@
 package mottak.enhet
 
-import mottak.Config
 import mottak.pdl.Personopplysninger
 
-class EnhetService(config: Config) {
-    private val norg = NorgClient(config)
-    private val skjerming = SkjermingClient(config)
-
+class EnhetService(
+    private val norg: Norg,
+    private val skjerming: Skjerming,
+) {
     fun getNavEnhet(personopplysninger: Personopplysninger): String {
         val erSkjermet = skjerming.isSkjermet(personopplysninger.personident)
 

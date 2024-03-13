@@ -12,11 +12,11 @@ import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 import java.util.*
 
-interface SafClient {
+interface Saf {
     fun hentJournalpost(journalpostId: String): Journalpost
 }
 
-class SafClientImpl(private val config: Config) : SafClient {
+class SafClient(private val config: Config) : Saf {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 

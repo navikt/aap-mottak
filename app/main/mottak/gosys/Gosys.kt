@@ -13,13 +13,13 @@ import mottak.arena.Fødselsnummer
 import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
-interface GosysClient {
+interface Gosys {
     fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent)
     fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent)
     fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhetsnummer: String)
 }
 
-class GosysClientImpl(private val config: Config) : GosysClient {
+class GosysClient(private val config: Config) : Gosys {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 

@@ -23,11 +23,11 @@ data class PdlConfig(
 
 class MissingPdlOpplysningException(msg: String) : RuntimeException(msg)
 
-interface PdlClient {
+interface Pdl {
     fun hentPersonopplysninger(ident: Ident): Personopplysninger
 }
 
-class PdlClientImpl(private val config: Config) : PdlClient {
+class PdlClient(private val config: Config) : Pdl {
     private val httpClient = HttpClientFactory.create()
     private val url = config.pdl.host.toURL()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)

@@ -14,15 +14,16 @@ import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 interface GosysClient {
-    fun opprettOppgave(journalpost: Journalpost.MedIdent)
+    fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent)
     fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent)
+    fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhetsnummer: String)
 }
 
 class GosysClientImpl(private val config: Config) : GosysClient {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    override fun opprettOppgave(journalpost: Journalpost.MedIdent) {
+    override fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent) {
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.gosys.scope)
             val ident = when (journalpost.personident) {
@@ -52,5 +53,9 @@ class GosysClientImpl(private val config: Config) : GosysClient {
 
     override fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent) {
         SECURE_LOG.info("Scanning har ikke klart å lese bruker, manuell behandling")
+    }
+
+    override fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhetsnummer: String) {
+        TODO("Not yet implemented")
     }
 }

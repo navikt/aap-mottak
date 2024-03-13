@@ -45,11 +45,15 @@ class ArenaClientFake : ArenaClient {
 }
 
 class GosysClientFake : GosysClient {
-    override fun opprettOppgave(journalpost: Journalpost.MedIdent) {
+    override fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent) {
         TODO("Not yet implemented")
     }
 
     override fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent) {
+        TODO("Not yet implemented")
+    }
+
+    override fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhetsnummer: String) {
         TODO("Not yet implemented")
     }
 

@@ -36,8 +36,13 @@ sealed class Journalpost(
         fun erEttersending(): Boolean {
             return skjemanummer == SKJEMANUMMER_SØKNAD_ETTERSENDING
         }
+
         fun erPliktkort(): Boolean {
             return erPliktkort
+        }
+
+        fun erSøknad(): Boolean {
+            return skjemanummer == SKJEMANUMMER_SØKNAD
         }
     }
 }

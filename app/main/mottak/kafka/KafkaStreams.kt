@@ -58,16 +58,22 @@ class MottakTopology(
 
         when {
             journalpost.erPliktkort() -> error("not implemented")
-            arena.sakFinnes(journalpost) -> opprettOppgave(journalpost, gosys, arena)
+            arena.sakFinnes(journalpost) -> gosys.opprettManuellJournalføringsoppgave(journalpost)
             kelvin.finnes(journalpost) -> kelvin.manuellJournaløring(journalpost)
-            else -> arena.opprettOppgave(journalpost)
+            else -> sakIkkeFunnet(journalpost, personopplysninger.gt)
         }
     }
 
-    private fun opprettOppgave(journalpost: Journalpost.MedIdent, gosys: GosysClient, arena: ArenaClient) {
-        when (journalpost.erEttersending()) {
-            true -> arena.opprettOppgave(journalpost)
-            false -> gosys.opprettOppgave(journalpost)
+    private fun sakIkkeFunnet(journalpost: Journalpost.MedIdent, navenhet: String) {
+        when {
+            journalpost.erEttersending() -> gosys.opprettManuellJournalføringsoppgave(journalpost)
+            journalpost.erSøknad() -> arenaOppgave(journalpost, navenhet)
+            else -> error("Ukjent hva man skal gjøre")
         }
+    }
+
+    private fun arenaOppgave(journalpost: Journalpost.MedIdent, navenhet: String) {
+        val saksnummer = arena.opprettOppgave(journalpost)
+        gosys.opprettAutomatiskJournalføringsoppgave(journalpost, navenhet)
     }
 }

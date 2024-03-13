@@ -4,7 +4,7 @@ data class PdlRequest(val query: String, val variables: Variables) {
     data class Variables(val ident: String)
 
     companion object {
-        fun hentGtOgGradering(personident: String) = PdlRequest(
+        fun hentPersonopplysninger(personident: String) = PdlRequest(
             query = personopplysninger.replace("\n", ""),
             variables = Variables(personident),
         )

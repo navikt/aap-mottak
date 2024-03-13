@@ -7,20 +7,14 @@ import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics
-import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
-import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
-import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import mottak.arena.ArenaClientImpl
 import mottak.behandlingsflyt.BehandlingsflytClientImpl
 import mottak.gosys.GosysClientImpl
 import mottak.joark.JoarkClientImpl
-import mottak.kafka.createTopology
-import mottak.pdl.PdlClient
+import mottak.kafka.MottakTopology
 import mottak.pdl.PdlClientImpl
 import mottak.saf.SafClientImpl
 import no.nav.aap.kafka.streams.v2.KafkaStreams
@@ -58,10 +52,10 @@ fun Application.server(
     val gosys = GosysClientImpl(config)
     val saf = SafClientImpl(config)
 
-    val topology = createTopology(saf, joark, pdl, kelvin, arena, gosys)
+    val topology = MottakTopology(saf, joark, pdl, kelvin, arena, gosys)
 
     kafka.connect(
-        topology = topology,
+        topology = topology(),
         config = config.kafka,
         registry = prometheus,
     )

@@ -1,6 +1,5 @@
 package mottak.kafka
 
-import mottak.Ident
 import mottak.Journalpost
 import mottak.arena.ArenaClient
 import mottak.behandlingsflyt.BehandlingsflytClient
@@ -9,18 +8,23 @@ import mottak.joark.JoarkClient
 import mottak.pdl.PdlClient
 import mottak.saf.SafClient
 import no.nav.aap.kafka.streams.v2.Topology
-import no.nav.aap.kafka.streams.v2.stream.MappedStream
 import no.nav.aap.kafka.streams.v2.topology
 
-fun createTopology(
-    saf: SafClient,
-    joark: JoarkClient,
-    pdl: PdlClient,
-    kelvin: BehandlingsflytClient,
-    arena: ArenaClient,
-    gosys: GosysClient,
-): Topology =
-    topology {
+private val IGNORED_MOTTAKSKANAL = listOf(
+    "EESSI",
+    "NAV_NO_CHAT",
+    "EKST_OPPS"
+)
+
+class MottakTopology(
+    private val saf: SafClient,
+    private val joark: JoarkClient,
+    private val pdl: PdlClient,
+    private val kelvin: BehandlingsflytClient,
+    private val arena: ArenaClient,
+    private val gosys: GosysClient,
+) {
+    operator fun invoke(): Topology = topology {
         consume(Topics.journalfoering)
             .filter { record -> record.mottaksKanal !in IGNORED_MOTTAKSKANAL }
             .filter { record -> record.temaNytt == "AAP" }
@@ -28,57 +32,42 @@ fun createTopology(
             .map { _, record -> saf.hentJournalpost(record.journalpostId.toString()) }
             .filter { !it.erJournalført() }
             .filter { it.erSøknadEllerEttersending() }
-            .branch({ it is Journalpost.UtenIdent }, håndterUtenIdent(gosys))
-            .branch({ it is Journalpost.MedIdent }, håndterMedIdent(kelvin, pdl, arena, gosys))
-            .default {
-                forEach { key, value ->
-                    error("Uhåndter type journalpost for kafka key $key type: ${value::class.simpleName}")
-                }
-            }
+            .forEach(::håndterJournalpost)
     }
 
-private fun håndterUtenIdent(
-    gosys: GosysClient,
-): (MappedStream<Journalpost>) -> Unit = { journalposter ->
-    journalposter.forEach { _, journalpost ->
-        gosys.opprettOppgaveForManglendeIdent(journalpost as Journalpost.UtenIdent)
+    private fun håndterJournalpost(
+        @Suppress("UNUSED_PARAMETER")
+        key: String,
+        journalpost: Journalpost,
+    ) {
+        when (journalpost) {
+            is Journalpost.MedIdent -> håndterJournalpost(journalpost)
+            is Journalpost.UtenIdent -> håndterJournalpost(journalpost)
+        }
     }
-}
 
-private fun håndterMedIdent(
-    kelvin: BehandlingsflytClient,
-    pdl: PdlClient,
-    arena: ArenaClient,
-    gosys: GosysClient
-): (MappedStream<Journalpost>) -> Unit = { journalposter ->
-    journalposter.forEach { _, journalpost ->
+    private fun håndterJournalpost(journalpost: Journalpost.UtenIdent) {
+        gosys.opprettOppgaveForManglendeIdent(journalpost)
+    }
 
-        val personopplysninger = pdl.hentPersonopplysninger(
-            ident = (journalpost as Journalpost.MedIdent).personident
-        )
+    private fun håndterJournalpost(journalpost: Journalpost.MedIdent) {
+        val personopplysninger = pdl.hentPersonopplysninger(journalpost.personident)
 
-        val journalpostMedAktivIdent = journalpost.copy(
-            personident = Ident.Personident(personopplysninger.personident)
-        )
+        @Suppress("NAME_SHADOWING")
+        val journalpost = journalpost.copy(personident = personopplysninger.personident)
 
         when {
-            journalpostMedAktivIdent.erPliktkort -> error("not implemented")
-            arena.sakFinnes(journalpostMedAktivIdent) -> opprettOppgave(journalpostMedAktivIdent, gosys, arena)
-            kelvin.finnes(journalpostMedAktivIdent) -> kelvin.manuellJournaløring(journalpostMedAktivIdent)
-            else -> arena.opprettOppgave(journalpostMedAktivIdent)
+            journalpost.erPliktkort() -> error("not implemented")
+            arena.sakFinnes(journalpost) -> opprettOppgave(journalpost, gosys, arena)
+            kelvin.finnes(journalpost) -> kelvin.manuellJournaløring(journalpost)
+            else -> arena.opprettOppgave(journalpost)
+        }
+    }
+
+    private fun opprettOppgave(journalpost: Journalpost.MedIdent, gosys: GosysClient, arena: ArenaClient) {
+        when (journalpost.erEttersending()) {
+            true -> arena.opprettOppgave(journalpost)
+            false -> gosys.opprettOppgave(journalpost)
         }
     }
 }
-
-private fun opprettOppgave(journalpost: Journalpost.MedIdent, gosys: GosysClient, arena: ArenaClient) {
-    when (journalpost.erEttersending()) {
-        true -> arena.opprettOppgave(journalpost)
-        false -> gosys.opprettOppgave(journalpost)
-    }
-}
-
-private val IGNORED_MOTTAKSKANAL = listOf(
-    "EESSI",
-    "NAV_NO_CHAT",
-    "EKST_OPPS"
-)

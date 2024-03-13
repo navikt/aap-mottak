@@ -10,12 +10,12 @@ data class PdlResponse(
         val hentGeografiskTilknytning: GeografiskTilknytning?,
         val hentPerson: Person?,
     ) {
-        val personident: String
+        val folkeregisteridentifikator: String
             get() = hentPerson
                 ?.folkeregisteridentifikator
                 ?.singleOrNull()
                 ?.identifikasjonsnummer
-                ?: throw GTException("Mangler personidentifikator fra PDL response.")
+                ?: throw MissingPdlOpplysningException("Mangler personidentifikator fra PDL response.")
 
         val gradering: String
             get() = hentPerson
@@ -27,7 +27,7 @@ data class PdlResponse(
         val geografiskTilknytning: String
             get() = hentGeografiskTilknytning
                 ?.tryIntoString()
-                ?: throw GTException("Mangler GT fra PDL response.")
+                ?: throw MissingPdlOpplysningException("Mangler GT fra PDL response.")
 
         data class Person(
             val folkeregisteridentifikator: List<FolkeregisterIdentifikator>,
@@ -78,7 +78,7 @@ data class PdlResponse(
 
             private fun tryIntoKommune(): String {
                 if (gtKommune == null || gtKommune.length != 4) {
-                    throw GTException(
+                    throw MissingPdlOpplysningException(
                         """
                         Felt:       GT   
                         Type:       $gtType
@@ -97,7 +97,7 @@ data class PdlResponse(
 
             private fun tryIntoBydel(): String {
                 if (gtBydel == null || gtBydel.length != 6) {
-                    throw GTException(
+                    throw MissingPdlOpplysningException(
                         """
                         Felt:       GT   
                         Type:       $gtType
@@ -116,7 +116,7 @@ data class PdlResponse(
 
             private fun tryIntoUtland(): String {
                 if (gtLand == null || gtLand.length != 3) {
-                    throw GTException(
+                    throw MissingPdlOpplysningException(
                         """
                         Felt:       GT   
                         Type:       $gtType

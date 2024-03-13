@@ -70,7 +70,7 @@ class SafClientFake : SafClient {
 class PdlClientFake: PdlClient {
     override fun hentPersonopplysninger(ident: Ident): Personopplysninger {
         return Personopplysninger(
-            personident = "1",
+            personident = Ident.Personident("1"),
             gradering = PdlGradering.UGRADERT,
             gt = "1234"
         )

@@ -1,9 +1,8 @@
 package mottak
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import mottak.kafka.MottakTopology
 import mottak.kafka.Topics
-import mottak.kafka.createTopology
-import mottak.pdl.PdlClient
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.test.StreamsMock
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
@@ -39,9 +38,10 @@ class StreamsTest {
     @Test
     fun `Test hele greia`() {
         val kafka = StreamsMock()
+        val topology = MottakTopology(saf, joark, pdl, kelvin, arena, gosys)
 
         kafka.connect(
-            topology = createTopology(saf, joark, pdl, kelvin, arena, gosys),
+            topology = topology(),
             config = StreamsConfig("", ""),
             registry = SimpleMeterRegistry(),
         )

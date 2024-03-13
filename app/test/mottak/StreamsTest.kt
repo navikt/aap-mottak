@@ -4,54 +4,39 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import mottak.enhet.EnhetService
 import mottak.kafka.MottakTopology
 import mottak.kafka.Topics
-import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.kafka.streams.v2.test.StreamsMock
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
-import uk.org.webcompere.systemstubs.jupiter.SystemStub
-import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension
 
-@ExtendWith(SystemStubsExtension::class)
 class StreamsTest {
-
-    @SystemStub
-    val env = EnvironmentVariables(
-        mapOf(
-            "KAFKA_SCHEMA_REGISTRY" to "mock://kafka",
-            "KAFKA_SCHEMA_REGISTRY_USER" to "",
-            "KAFKA_SCHEMA_REGISTRY_PASSWORD" to "",
-            "KAFKA_TRUSTSTORE_PATH" to "",
-            "KAFKA_KEYSTORE_PATH" to "",
-            "KAFKA_CREDSTORE_PASSWORD" to ""
-        )
-    )
 
     @Test
     fun `Test hele greia`() {
         val kafka = StreamsMock()
+        val config = TestConfig()
+        val topics = Topics(config.kafka)
         val topology = MottakTopology(
-            saf = SafFake,
-            joark = JoarkFake,
-            pdl = PdlFake,
-            kelvin = BehandlingsflytFake,
-            arena = ArenaFake,
-            gosys = GosysFake,
-            enhetService = EnhetService(
-                norg = NorgFake,
-                skjerming = SkjermingFake,
-            )
+            config,
+            SafFake,
+            JoarkFake,
+            PdlFake,
+            BehandlingsflytFake,
+            ArenaFake,
+            GosysFake,
+            EnhetService(
+                NorgFake,
+                SkjermingFake,
+            ),
         )
 
         kafka.connect(
             topology = topology(),
-            config = StreamsConfig("", ""),
+            config = config.kafka,
             registry = SimpleMeterRegistry(),
         )
 
-        val journalføringstopic = kafka.testTopic(Topics.journalfoering)
+        val journalføringstopic = kafka.testTopic(topics.journalfoering)
         journalføringstopic.produce("1") {
             JournalfoeringHendelseRecord.newBuilder().apply {
                 hendelsesId = "1"

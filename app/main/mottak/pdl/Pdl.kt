@@ -8,18 +8,11 @@ import mottak.Ident
 import mottak.http.HttpClientFactory
 import mottak.http.tryInto
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
-import java.net.URI
 import java.util.*
 
 enum class PdlGradering {
     STRENGT_FORTROLIG, STRENGT_FORTROLIG_UTLAND, FORTROLIG, UGRADERT
 }
-
-data class PdlConfig(
-    val host: URI,
-    val scope: String,
-    val audience: String,
-)
 
 class MissingPdlOpplysningException(msg: String) : RuntimeException(msg)
 
@@ -29,7 +22,7 @@ interface Pdl {
 
 class PdlClient(private val config: Config) : Pdl {
     private val httpClient = HttpClientFactory.create()
-    private val url = config.pdl.host.toURL()
+    private val host = config.pdl.host.toURL()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun hentPersonopplysninger(ident: Ident): Personopplysninger {
@@ -50,7 +43,7 @@ class PdlClient(private val config: Config) : Pdl {
     private fun query(query: PdlRequest): PdlResponse.Data {
         return runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.gosys.scope)
-            httpClient.post(url) {
+            httpClient.post("$host/graphql") {
                 accept(ContentType.Application.Json)
                 header("Nav-Call-Id", UUID.randomUUID())
                 header("TEMA", "AAP")

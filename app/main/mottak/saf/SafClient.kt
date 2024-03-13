@@ -51,7 +51,7 @@ class SafClient(private val config: Config) : Saf {
 
     private suspend fun graphqlQuery(query: SafRequest): SafRespons {
         val token = tokenProvider.getClientCredentialToken(config.gosys.scope)
-        val request = httpClient.post("${config.saf.baseUrl}/graphql") {
+        val request = httpClient.post("${config.saf.host}/graphql") {
             accept(ContentType.Application.Json)
             header("Nav-Callid", UUID.randomUUID().toString())
             bearerAuth(token)

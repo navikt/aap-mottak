@@ -4,18 +4,17 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import mottak.Config
-import mottak.getEnvVar
 import mottak.http.HttpClientFactory
 import mottak.http.tryInto
 import mottak.pdl.PdlGradering
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
-data class NorgConfig(
-    val host: String = getEnvVar("NORG_HOST"),
-)
-
 interface Norg {
-    fun hentArbeidsfordeling(geografiskOmraade: String, skjermet: Boolean, gradering: PdlGradering): List<ArbeidsfordelingDtoResponse>
+    fun hentArbeidsfordeling(
+        geografiskOmraade: String,
+        skjermet: Boolean,
+        gradering: PdlGradering
+    ): List<ArbeidsfordelingDtoResponse>
 }
 
 class NorgClient(private val config: Config) : Norg {
@@ -23,11 +22,15 @@ class NorgClient(private val config: Config) : Norg {
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    override fun hentArbeidsfordeling(geografiskOmraade: String, skjermet: Boolean, gradering: PdlGradering): List<ArbeidsfordelingDtoResponse> {
+    override fun hentArbeidsfordeling(
+        geografiskOmraade: String,
+        skjermet: Boolean,
+        gradering: PdlGradering
+    ): List<ArbeidsfordelingDtoResponse> {
         val request = ArbeidsfordelingDtoRequest(
             geografiskOmraade = geografiskOmraade,
             skjermet = skjermet,
-            diskresjonskode = when(gradering) {
+            diskresjonskode = when (gradering) {
                 PdlGradering.STRENGT_FORTROLIG, PdlGradering.STRENGT_FORTROLIG_UTLAND -> "SPSF"
                 PdlGradering.FORTROLIG -> "SPFO"
                 PdlGradering.UGRADERT -> "ANY"

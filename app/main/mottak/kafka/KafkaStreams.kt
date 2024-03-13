@@ -1,14 +1,23 @@
 package mottak.kafka
 
+import mottak.Config
 import mottak.Journalpost
 import mottak.arena.Arena
+import mottak.arena.ArenaClient
 import mottak.behandlingsflyt.Behandlingsflyt
+import mottak.behandlingsflyt.BehandlingsflytClient
 import mottak.enhet.EnhetService
+import mottak.enhet.NorgClient
+import mottak.enhet.SkjermingClient
 import mottak.gosys.Gosys
+import mottak.gosys.GosysClient
 import mottak.joark.Joark
+import mottak.joark.JoarkClient
 import mottak.pdl.Pdl
+import mottak.pdl.PdlClient
 import mottak.pdl.Personopplysninger
 import mottak.saf.Saf
+import mottak.saf.SafClient
 import no.nav.aap.kafka.streams.v2.Topology
 import no.nav.aap.kafka.streams.v2.topology
 
@@ -19,16 +28,19 @@ private val IGNORED_MOTTAKSKANAL = listOf(
 )
 
 class MottakTopology(
-    private val saf: Saf,
-    private val joark: Joark,
-    private val pdl: Pdl,
-    private val kelvin: Behandlingsflyt,
-    private val arena: Arena,
-    private val gosys: Gosys,
-    private val enhetService: EnhetService,
+    config: Config,
+    private val saf: Saf = SafClient(config),
+    private val joark: Joark = JoarkClient(config),
+    private val pdl: Pdl = PdlClient(config),
+    private val kelvin: Behandlingsflyt = BehandlingsflytClient(config),
+    private val arena: Arena = ArenaClient(config),
+    private val gosys: Gosys = GosysClient(config),
+    private val enhetService: EnhetService = EnhetService(NorgClient(config), SkjermingClient(config)),
 ) {
+    private val topics = Topics(config.kafka)
+
     operator fun invoke(): Topology = topology {
-        consume(Topics.journalfoering)
+        consume(topics.journalfoering)
             .filter { record -> record.mottaksKanal !in IGNORED_MOTTAKSKANAL }
             .filter { record -> record.temaNytt == "AAP" }
             .filter { record -> record.journalpostStatus == "MOTTATT" }

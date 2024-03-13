@@ -31,7 +31,7 @@ class GosysClient(private val config: Config) : Gosys {
                 is Ident.Personident -> journalpost.personident.id
             }
 
-            val response = httpClient.post("${config.gosys.baseUrl}/opprettoppgave") {
+            val response = httpClient.post("${config.gosys.host}/opprettoppgave") {
                 accept(ContentType.Application.Json)
                 bearerAuth(token)
                 setBody(

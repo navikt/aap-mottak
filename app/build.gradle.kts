@@ -4,7 +4,7 @@ plugins {
     application
 }
 
-val aapLibVersion = "4.0.22"
+val aapLibVersion = "4.0.26"
 val ktorVersion = "2.3.9"
 
 application {
@@ -33,15 +33,16 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:1.12.3")
     implementation("ch.qos.logback:logback-classic:1.5.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
 
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.4")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("com.github.navikt.aap-libs:kafka-test-2:$aapLibVersion")
-    testImplementation("uk.org.webcompere:system-stubs-jupiter:2.1.6")
-
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    testImplementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+    testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
 }
 
 repositories {

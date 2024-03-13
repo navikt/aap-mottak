@@ -10,16 +10,7 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import mottak.arena.ArenaClient
-import mottak.behandlingsflyt.BehandlingsflytClient
-import mottak.enhet.EnhetService
-import mottak.enhet.NorgClient
-import mottak.enhet.SkjermingClient
-import mottak.gosys.GosysClient
-import mottak.joark.JoarkClient
 import mottak.kafka.MottakTopology
-import mottak.pdl.PdlClient
-import mottak.saf.SafClient
 import no.nav.aap.kafka.streams.v2.KafkaStreams
 import no.nav.aap.kafka.streams.v2.Streams
 import org.slf4j.Logger
@@ -48,18 +39,7 @@ fun Application.server(
         kafka.close()
     }
 
-    val topology = MottakTopology(
-        joark = JoarkClient(config),
-        kelvin = BehandlingsflytClient(config),
-        pdl = PdlClient(config),
-        arena = ArenaClient(config),
-        gosys = GosysClient(config),
-        saf = SafClient(config),
-        enhetService = EnhetService(
-            norg = NorgClient(config),
-            skjerming = SkjermingClient(config),
-        ),
-    )
+    val topology = MottakTopology(config)
 
     kafka.connect(
         topology = topology(),

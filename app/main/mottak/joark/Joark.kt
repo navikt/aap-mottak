@@ -22,7 +22,7 @@ class JoarkClient(private val config: Config) : Joark {
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.joark.scope)
             val response =
-                httpClient.patch("${config.joark.baseUrl}/rest/journalpostapi/v1/journalpost/${journalpostId}/ferdigstill") {
+                httpClient.patch("${config.joark.host}/rest/journalpostapi/v1/journalpost/${journalpostId}/ferdigstill") {
                     accept(ContentType.Application.Json)
                     bearerAuth(token)
                     setBody(FerdigstillRequest("enhet"))

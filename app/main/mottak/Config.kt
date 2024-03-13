@@ -1,76 +1,53 @@
 package mottak
 
-import mottak.enhet.NorgConfig
-import mottak.enhet.SkjermingConfig
-import mottak.pdl.PdlConfig
-import no.nav.aap.kafka.schemaregistry.SchemaRegistryConfig
-import no.nav.aap.kafka.streams.v2.config.SslConfig
 import no.nav.aap.kafka.streams.v2.config.StreamsConfig
 import no.nav.aap.ktor.client.auth.azure.AzureConfig
 import java.net.URI
 
 fun getEnvVar(envar: String) = System.getenv(envar) ?: error("missing envvar $envar")
 
-data class Config(
-    val pdl: PdlConfig = PdlConfig(
-        host = getEnvVar("PDL_HOST").let(::URI),
-        scope = getEnvVar("PDL_SCOPE"),
-        audience = getEnvVar("PDL_AUDIENCE"),
-    ),
-    val skjerming: SkjermingConfig = SkjermingConfig(
-        host = getEnvVar("SKJERMING_HOST"),
-    ),
+open class Config(
+    val pdl: PdlConfig = PdlConfig(),
+    val skjerming: SkjermingConfig = SkjermingConfig(),
     val norg: NorgConfig = NorgConfig(),
-    val kafka: StreamsConfig = StreamsConfig(
-        brokers = getEnvVar("KAFKA_BROKERS"),
-        applicationId = getEnvVar("KAFKA_STREAMS_APPLICATION_ID"),
-        ssl = SslConfig(
-            truststorePath = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
-            keystorePath = getEnvVar("KAFKA_KEYSTORE_PATH"),
-            credstorePsw = getEnvVar("KAFKA_CREDSTORE_PASSWORD"),
-        ),
-        schemaRegistry = SchemaRegistryConfig(
-            url = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL"),
-            user = getEnvVar("KAFKA_SCHEMA_REGISTRY_USER"),
-            password = getEnvVar("KAFKA_SCHEMA_REGISTRY_PASSWORD"),
-        ).properties()
-    ),
-    val fssProxy: FssProxyConfig = FssProxyConfig(
-        baseUrl = getEnvVar("FSS_PROXY_URL"),
-        scope = getEnvVar("FSS_PROXY_SCOPE")
-    ),
-    val gosys: GosysConfig = GosysConfig(
-        baseUrl = getEnvVar("GOSYS_OPPGAVE_URL"),
-        scope = getEnvVar("GOSYS_OPPGAVE_SCOPE")
-    ),
-    val saf: SafConfig = SafConfig(
-        baseUrl = getEnvVar("SAF_URL"),
-        scope = getEnvVar("SAF_SCOPE")
-    ),
-    val joark: JoarkConfig = JoarkConfig(
-        baseUrl = getEnvVar("JOARK_URL"),
-        scope = getEnvVar("JOARK_SCOPE")
-    ),
+    val kafka: StreamsConfig = StreamsConfig(),
+    val fssProxy: FssProxyConfig = FssProxyConfig(),
+    val gosys: GosysConfig = GosysConfig(),
+    val saf: SafConfig = SafConfig(),
+    val joark: JoarkConfig = JoarkConfig(),
     val azure: AzureConfig = AzureConfig(),
 )
 
 data class FssProxyConfig(
-    val baseUrl: String,
-    val scope: String
+    val host: String = getEnvVar("FSS_PROXY_HOST"),
+    val scope: String = getEnvVar("FSS_PROXY_SCOPE"),
 )
 
 data class GosysConfig(
-    val baseUrl: String,
-    val scope: String
+    val host: String = getEnvVar("GOSYS_OPPGAVE_HOST"),
+    val scope: String = getEnvVar("GOSYS_OPPGAVE_SCOPE"),
 )
 
 data class SafConfig(
-    val baseUrl: String,
-    val scope: String
+    val host: String = getEnvVar("SAF_HOST"),
+    val scope: String = getEnvVar("SAF_SCOPE"),
 )
 
 data class JoarkConfig(
-    val baseUrl: String,
-    val scope: String
+    val host: String = getEnvVar("JOARK_HOST"),
+    val scope: String = getEnvVar("JOARK_SCOPE"),
 )
 
+data class NorgConfig(
+    val host: String = getEnvVar("NORG_HOST"),
+)
+
+data class SkjermingConfig(
+    val host: String = getEnvVar("SKJERMING_HOST"),
+)
+
+data class PdlConfig(
+    val host: URI = getEnvVar("PDL_HOST").let(::URI),
+    val scope: String = getEnvVar("PDL_SCOPE"),
+    val audience: String = getEnvVar("PDL_AUDIENCE"),
+)

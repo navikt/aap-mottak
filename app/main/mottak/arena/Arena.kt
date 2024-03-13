@@ -28,7 +28,7 @@ class ArenaClient(private val config: Config) : Arena {
                 is Ident.Personident -> journalpost.personident.id
             }
 
-            val response = httpClient.get("${config.fssProxy.baseUrl}/vedtak") {
+            val response = httpClient.get("${config.fssProxy.host}/vedtak") {
                 accept(ContentType.Application.Json)
                 header("personident", ident)
                 bearerAuth(token)
@@ -49,7 +49,7 @@ class ArenaClient(private val config: Config) : Arena {
                 is Ident.Aktørid -> error("AktørID er ikke støttet i Oppgave")
                 is Ident.Personident -> journalpost.personident.id
             }
-            val response = httpClient.post("${config.fssProxy.baseUrl}/opprettoppgave") {
+            val response = httpClient.post("${config.fssProxy.host}/opprettoppgave") {
                 accept(ContentType.Application.Json)
                 header("personident", journalpost.personident)
                 bearerAuth(token)

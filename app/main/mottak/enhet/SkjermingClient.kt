@@ -8,15 +8,11 @@ import mottak.Ident
 import mottak.http.HttpClientFactory
 import mottak.http.tryInto
 
-data class SkjermingConfig(
-    val host: String,
-)
-
 interface Skjerming {
     fun isSkjermet(personident: Ident.Personident): Boolean
 }
 
-class SkjermingClient(config: Config): Skjerming {
+class SkjermingClient(config: Config) : Skjerming {
     private val httpClient = HttpClientFactory.create()
     private val host: String = config.skjerming.host
 

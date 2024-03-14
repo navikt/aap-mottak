@@ -1,5 +1,7 @@
 package mottak.kafka
 
+import libs.kafka.Topology
+import libs.kafka.topology
 import mottak.Config
 import mottak.Journalpost
 import mottak.arena.Arena
@@ -18,8 +20,6 @@ import mottak.pdl.PdlClient
 import mottak.pdl.Personopplysninger
 import mottak.saf.Saf
 import mottak.saf.SafClient
-import no.nav.aap.kafka.streams.v2.Topology
-import no.nav.aap.kafka.streams.v2.topology
 
 private val IGNORED_MOTTAKSKANAL = listOf(
     "EESSI",
@@ -44,7 +44,7 @@ class MottakTopology(
             .filter { record -> record.mottaksKanal !in IGNORED_MOTTAKSKANAL }
             .filter { record -> record.temaNytt == "AAP" }
             .filter { record -> record.journalpostStatus == "MOTTATT" }
-            .map { _, record -> saf.hentJournalpost(record.journalpostId.toString()) }
+            .map { record -> saf.hentJournalpost(record.journalpostId.toString()) }
             .filter { !it.erJournalført() }
             .filter { it.erSøknadEllerEttersending() }
             .forEach(::håndterJournalpost)

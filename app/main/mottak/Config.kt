@@ -1,6 +1,6 @@
 package mottak
 
-import no.nav.aap.kafka.streams.v2.config.StreamsConfig
+import libs.kafka.StreamsConfig
 import no.nav.aap.ktor.client.auth.azure.AzureConfig
 import java.net.URI
 

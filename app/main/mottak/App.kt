@@ -10,9 +10,9 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import libs.kafka.KafkaStreams
+import libs.kafka.Streams
 import mottak.kafka.MottakTopology
-import no.nav.aap.kafka.streams.v2.KafkaStreams
-import no.nav.aap.kafka.streams.v2.Streams
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

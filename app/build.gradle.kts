@@ -4,7 +4,7 @@ plugins {
     application
 }
 
-val aapLibVersion = "4.0.30"
+val aapLibVersion = "5.0.0"
 val ktorVersion = "2.3.9"
 
 application {
@@ -13,9 +13,8 @@ application {
 
 dependencies {
     implementation("com.github.navikt.aap-libs:ktor-auth:$aapLibVersion")
-    implementation("com.github.navikt.aap-libs:kafka-2:$aapLibVersion")
+    implementation("com.github.navikt.aap-libs:kafka-streams:$aapLibVersion")
     implementation("com.github.navikt.aap-libs:kafka-avroserde:$aapLibVersion")
-    implementation("org.apache.kafka:kafka-clients:3.7.0")
 
     implementation("no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas:08271806")
 
@@ -38,7 +37,7 @@ dependencies {
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.4")
 
     testImplementation(kotlin("test"))
-    testImplementation("com.github.navikt.aap-libs:kafka-test-2:$aapLibVersion")
+    testImplementation("com.github.navikt.aap-libs:kafka-streams-test:$aapLibVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     testImplementation("io.ktor:ktor-serialization-jackson:$ktorVersion")

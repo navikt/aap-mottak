@@ -3,9 +3,9 @@ package mottak
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import no.nav.aap.kafka.streams.v2.config.SchemaRegistryConfig
-import no.nav.aap.kafka.streams.v2.config.SslConfig
-import no.nav.aap.kafka.streams.v2.config.StreamsConfig
+import libs.kafka.SchemaRegistryConfig
+import libs.kafka.SslConfig
+import libs.kafka.StreamsConfig
 import no.nav.aap.ktor.client.auth.azure.AzureConfig
 import java.net.ServerSocket
 import java.net.URI

@@ -1,8 +1,8 @@
 package mottak.kafka
 
-import no.nav.aap.kafka.serde.avro.AvroSerde
-import no.nav.aap.kafka.streams.v2.Topic
-import no.nav.aap.kafka.streams.v2.config.StreamsConfig
+import libs.kafka.AvroSerde
+import libs.kafka.StreamsConfig
+import libs.kafka.Topic
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 
 class Topics(private val config: StreamsConfig) {

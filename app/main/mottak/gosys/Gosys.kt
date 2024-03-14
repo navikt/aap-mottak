@@ -10,13 +10,14 @@ import mottak.Journalpost
 import mottak.SECURE_LOG
 import mottak.arena.ArenaOpprettOppgaveParams
 import mottak.arena.Fødselsnummer
+import mottak.enhet.NavEnhet
 import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 interface Gosys {
     fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent)
     fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent)
-    fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhetsnummer: String)
+    fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet)
 }
 
 class GosysClient(private val config: Config) : Gosys {
@@ -55,7 +56,7 @@ class GosysClient(private val config: Config) : Gosys {
         SECURE_LOG.info("Scanning har ikke klart å lese bruker, manuell behandling")
     }
 
-    override fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhetsnummer: String) {
+    override fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         TODO("Not yet implemented")
     }
 }

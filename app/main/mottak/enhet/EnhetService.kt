@@ -6,7 +6,7 @@ class EnhetService(
     private val norg: Norg,
     private val skjerming: Skjerming,
 ) {
-    fun getNavEnhet(personopplysninger: Personopplysninger): String {
+    fun getNavEnhet(personopplysninger: Personopplysninger): NavEnhet {
         val erSkjermet = skjerming.isSkjermet(personopplysninger.personident)
 
         val enhetsnrListe = norg.hentArbeidsfordeling(
@@ -17,6 +17,13 @@ class EnhetService(
 
         if (enhetsnrListe.isEmpty()) error("Fant ingen arbeidsfordeling for ${personopplysninger.personident}")
 
-        return enhetsnrListe.first().enhetNr // TODO: er dette riktig api-endepunkt?
+        return NavEnhet(enhetsnrListe.first().enhetNr)
+    }
+
+    fun getNavEnhetForFordelingsoppgave(): NavEnhet {
+        return NavEnhet("oslo")
     }
 }
+
+@JvmInline
+value class NavEnhet(val nr: String)

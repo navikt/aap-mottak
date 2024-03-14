@@ -57,6 +57,7 @@ class PdlClient(private val config: Config) : Pdl {
     }
 }
 
+// TODO: sleng på barn med adressebeskyttlese
 data class Personopplysninger(
     val personident: Ident.Personident,
     val gradering: PdlGradering,

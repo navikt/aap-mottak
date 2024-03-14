@@ -6,13 +6,13 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
+import lib.kafka.StreamsMock
 import mottak.kafka.Topics
 import mottak.pdl.PdlResponse
 import mottak.saf.SafData
 import mottak.saf.SafDokumentoversikt
 import mottak.saf.SafJournalpost
 import mottak.saf.SafRespons
-import no.nav.aap.kafka.streams.v2.test.StreamsMock
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.junit.jupiter.api.Test
 

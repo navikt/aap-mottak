@@ -9,6 +9,7 @@ import mottak.arena.ArenaClient
 import mottak.behandlingsflyt.Behandlingsflyt
 import mottak.behandlingsflyt.BehandlingsflytClient
 import mottak.enhet.EnhetService
+import mottak.enhet.NavEnhet
 import mottak.enhet.NorgClient
 import mottak.enhet.SkjermingClient
 import mottak.gosys.Gosys
@@ -17,7 +18,6 @@ import mottak.joark.Joark
 import mottak.joark.JoarkClient
 import mottak.pdl.Pdl
 import mottak.pdl.PdlClient
-import mottak.pdl.Personopplysninger
 import mottak.saf.Saf
 import mottak.saf.SafClient
 
@@ -41,55 +41,82 @@ class MottakTopology(
 
     operator fun invoke(): Topology = topology {
         consume(topics.journalfoering)
+            .secureLogWithKey { key, value -> warn("key: $key value: $value") }
             .filter { record -> record.mottaksKanal !in IGNORED_MOTTAKSKANAL }
             .filter { record -> record.temaNytt == "AAP" }
-            .filter { record -> record.journalpostStatus == "MOTTATT" }
+            .filter { record -> record.journalpostStatus == "M" }
             .map { record -> saf.hentJournalpost(record.journalpostId.toString()) }
-            .filter { !it.erJournalført() }
-            .filter { it.erSøknadEllerEttersending() }
+            .filter { it.erSkjemaTilAAP() }
+            .filter { !it.erJournalført() } // todo logg hvis dette skjer (topic skal være up-to-date med saf)
+            .map { jp -> enrichWithNavEnhet(jp) }
             .forEach(::håndterJournalpost)
+    }
+
+    private fun enrichWithNavEnhet(journalpost: Journalpost): Pair<Journalpost, NavEnhet> {
+        return when (journalpost) {
+            is Journalpost.MedIdent -> {
+                val personopplysninger = pdl.hentPersonopplysninger(journalpost.personident)
+                @Suppress("NAME_SHADOWING")
+                val journalpost = journalpost.copy(personident = personopplysninger.personident)
+                journalpost to enhetService.getNavEnhet(personopplysninger)
+            }
+            is Journalpost.UtenIdent -> {
+                journalpost to enhetService.getNavEnhetForFordelingsoppgave()
+            }
+        }
     }
 
     private fun håndterJournalpost(
         @Suppress("UNUSED_PARAMETER")
         key: String,
-        journalpost: Journalpost,
+        journalpostMedEnhet: Pair<Journalpost, NavEnhet>,
     ) {
+        val (journalpost, enhet) = journalpostMedEnhet
+
         when (journalpost) {
-            is Journalpost.MedIdent -> håndterJournalpost(journalpost)
+            is Journalpost.MedIdent -> håndterJournalpost(journalpost, enhet)
             is Journalpost.UtenIdent -> håndterJournalpost(journalpost)
         }
+
+        joark.oppdaterJournalpost(journalpost, enhet)
     }
 
     private fun håndterJournalpost(journalpost: Journalpost.UtenIdent) {
         gosys.opprettOppgaveForManglendeIdent(journalpost)
     }
 
-    private fun håndterJournalpost(journalpost: Journalpost.MedIdent) {
-        val personopplysninger = pdl.hentPersonopplysninger(journalpost.personident)
+    private fun håndterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
+        if (journalpost.erPliktkort()) {
+            error("not implemented")
+        }
 
-        @Suppress("NAME_SHADOWING")
-        val journalpost = journalpost.copy(personident = personopplysninger.personident)
+        if (arena.finnesSak(journalpost)) {
+            gosys.opprettManuellJournalføringsoppgave(journalpost)
+        } else if (skalTilKelvin(journalpost)) {
+            kelvin.finnEllerOpprettSak(journalpost)
+        } else {
+            sakIkkeFunnet(journalpost, enhet)
+        }
 
+    }
+
+    private fun skalTilKelvin(journalpost: Journalpost): Boolean {
+        return false
+    }
+
+    private fun sakIkkeFunnet(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         when {
-            journalpost.erPliktkort() -> error("not implemented")
-            arena.finnesSak(journalpost) -> gosys.opprettManuellJournalføringsoppgave(journalpost)
-            kelvin.finnesSak(journalpost) -> kelvin.manuellJournaløring(journalpost)
-            else -> sakIkkeFunnet(journalpost, personopplysninger)
+            journalpost.erEttersending() -> {
+                gosys.opprettManuellJournalføringsoppgave(journalpost)
+            }
+            journalpost.erSøknad() -> arenaOppgave(journalpost, enhet)
+            journalpost.erPliktkort() -> {}
+            else -> error("Uhåndtert skjema for journalpostId ${journalpost.journalpostId}")
         }
     }
 
-    private fun sakIkkeFunnet(journalpost: Journalpost.MedIdent, opplysninger: Personopplysninger) {
-        when {
-            journalpost.erEttersending() -> gosys.opprettManuellJournalføringsoppgave(journalpost)
-            journalpost.erSøknad() -> arenaOppgave(journalpost, opplysninger)
-            else -> error("Ukjent hva man skal gjøre")
-        }
-    }
-
-    private fun arenaOppgave(journalpost: Journalpost.MedIdent, opplysninger: Personopplysninger) {
+    private fun arenaOppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         val saksnummer = arena.opprettOppgave(journalpost)
-        val enhet = enhetService.getNavEnhet(opplysninger)
         gosys.opprettAutomatiskJournalføringsoppgave(journalpost, enhet)
     }
 }

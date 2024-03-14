@@ -3,6 +3,7 @@ package mottak
 import mottak.arena.Arena
 import mottak.behandlingsflyt.Behandlingsflyt
 import mottak.enhet.ArbeidsfordelingDtoResponse
+import mottak.enhet.NavEnhet
 import mottak.enhet.Norg
 import mottak.enhet.Skjerming
 import mottak.gosys.Gosys
@@ -13,13 +14,21 @@ import mottak.pdl.Personopplysninger
 import mottak.saf.Saf
 
 object JoarkFake : Joark {
-    override fun ferdigstill(journalpostId: Long) {
-        TODO("Not yet implemented")
+    private val oppdaterteJournalposter = mutableListOf<Pair<Journalpost, NavEnhet>>()
+
+    override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet) {
+        oppdaterteJournalposter.add(journalpost to enhet)
+    }
+
+    fun harOppdatert(journalpostId: String, enhet: NavEnhet): Boolean {
+        return oppdaterteJournalposter.any {
+            it.first.journalpostId == journalpostId && it.second == enhet
+        }
     }
 }
 
 object BehandlingsflytFake : Behandlingsflyt {
-    override fun finnesSak(journalpost: Journalpost): Boolean {
+    override fun finnEllerOpprettSak(journalpost: Journalpost): Boolean {
         return false
     }
 
@@ -66,22 +75,24 @@ object ArenaFake : Arena {
 }
 
 object GosysFake : Gosys {
-    private val oppgaver = mutableListOf<Pair<String, String>>()
+    private val automatiskeOppgaver = mutableListOf<Pair<String, NavEnhet>>()
+    private val manuelleOppgaver = mutableListOf<String>()
+    private val identitetsløseOppgaver = mutableListOf<String>()
 
     override fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent) {
-        TODO("Not yet implemented")
+        manuelleOppgaver.add(journalpost.journalpostId)
     }
 
     override fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent) {
-        TODO("Not yet implemented")
+        identitetsløseOppgaver.add(journalpost.journalpostId)
     }
 
-    override fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhetsnummer: String) {
-        oppgaver.add(journalpost.journalpostId to enhetsnummer)
+    override fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
+        automatiskeOppgaver.add(journalpost.journalpostId to enhet)
     }
 
-    fun harOpprettetOppgave(id: String, enhet: String): Boolean {
-        return oppgaver.any { it.first == id && it.second == enhet }
+    fun harOpprettetAutomatiskOppgave(id: String, enhet: NavEnhet): Boolean {
+        return automatiskeOppgaver.any { it.first == id && it.second == enhet }
     }
 }
 

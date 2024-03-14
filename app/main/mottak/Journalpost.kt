@@ -2,6 +2,7 @@ package mottak
 
 const val SKJEMANUMMER_SØKNAD = "NAV 11-13.05"
 const val SKJEMANUMMER_SØKNAD_ETTERSENDING = "NAVe 11-13.05"
+const val SKJEMANUMMER_PLIKTKORT = "TODO"
 
 sealed class Journalpost(
     open val journalpostId: String,
@@ -12,10 +13,11 @@ sealed class Journalpost(
         return status == JournalpostStatus.JOURNALFØRT
     }
 
-    fun erSøknadEllerEttersending(): Boolean {
+    fun erSkjemaTilAAP(): Boolean {
         return skjemanummer in listOf(
             SKJEMANUMMER_SØKNAD,
-            SKJEMANUMMER_SØKNAD_ETTERSENDING
+            SKJEMANUMMER_SØKNAD_ETTERSENDING,
+            SKJEMANUMMER_PLIKTKORT,
         )
     }
 
@@ -38,7 +40,7 @@ sealed class Journalpost(
         }
 
         fun erPliktkort(): Boolean {
-            return erPliktkort
+            return skjemanummer == SKJEMANUMMER_PLIKTKORT
         }
 
         fun erSøknad(): Boolean {

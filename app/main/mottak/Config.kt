@@ -1,5 +1,6 @@
 package mottak
 
+import libs.kafka.SchemaRegistryConfig
 import libs.kafka.StreamsConfig
 import no.nav.aap.ktor.client.auth.azure.AzureConfig
 import java.net.URI
@@ -8,7 +9,7 @@ open class Config(
     val pdl: PdlConfig = PdlConfig(),
     val skjerming: SkjermingConfig = SkjermingConfig(),
     val norg: NorgConfig = NorgConfig(),
-    val kafka: StreamsConfig = StreamsConfig(),
+    val kafka: StreamsConfig = StreamsConfig(schemaRegistry = SchemaRegistryConfig()),
     val fssProxy: FssProxyConfig = FssProxyConfig(),
     val gosys: OppgaveConfig = OppgaveConfig(),
     val saf: SafConfig = SafConfig(),

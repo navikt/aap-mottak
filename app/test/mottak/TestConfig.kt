@@ -14,12 +14,15 @@ class TestConfig : Config(
     pdl = PdlConfig(
         host = URI.create("http://localhost:${Ports.randomAvailable()}"),
         scope = "",
+        env = Env.dev
     ),
     skjerming = SkjermingConfig(
         host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
+        env = Env.dev
     ),
     norg = NorgConfig(
         host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
+        env = Env.dev
     ),
     kafka = StreamsConfig(
         applicationId = "",
@@ -38,18 +41,22 @@ class TestConfig : Config(
     fssProxy = FssProxyConfig(
         host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
         scope = "",
+        env = Env.dev
     ),
     gosys = OppgaveConfig(
         host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
         scope = "",
+        env = Env.dev
     ),
     saf = SafConfig(
         host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
         scope = "",
+        env = Env.dev
     ),
     joark = DokarkivConfig(
         host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
         scope = "",
+        env = Env.dev
     ),
     azure = AzureConfig(
         tokenEndpoint = "http://localhost:${Ports.randomAvailable()}",

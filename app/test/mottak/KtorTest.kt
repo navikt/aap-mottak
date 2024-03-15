@@ -30,7 +30,7 @@ class KtorTest {
             }
             externalServices {
                 hosts(config.pdl.host.host, block = Application::pdlFake)
-                hosts(config.saf.host, block = Application::safFake)
+                hosts(config.saf.host.host, block = Application::safFake)
             }
         }
 

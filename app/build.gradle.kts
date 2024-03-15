@@ -1,7 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.22"
     id("io.ktor.plugin") version "2.3.9"
-    application
 }
 
 val aapLibVersion = "5.0.2"

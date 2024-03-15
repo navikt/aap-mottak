@@ -17,8 +17,10 @@ class StreamsTest {
         val kafka = StreamsMock()
         val config = TestConfig()
         val topics = Topics(config.kafka)
+        val registry = SimpleMeterRegistry()
         val topology = MottakTopology(
             config,
+            registry,
             SafFake,
             JoarkFake,
             PdlFake,
@@ -34,7 +36,7 @@ class StreamsTest {
         kafka.connect(
             topology = topology(),
             config = config.kafka,
-            registry = SimpleMeterRegistry(),
+            registry = registry,
         )
 
         val journalføringstopic = kafka.testTopic(topics.journalfoering)
@@ -46,7 +48,7 @@ class StreamsTest {
                 journalpostId = 123L
                 temaGammelt = "AAP"
                 temaNytt = "AAP"
-                journalpostStatus = "M"
+                journalpostStatus = "MOTTATT"
                 mottaksKanal = "NAV_NO"
                 kanalReferanseId = ""
                 behandlingstema = ""

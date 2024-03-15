@@ -39,7 +39,7 @@ fun Application.server(
         kafka.close()
     }
 
-    val topology = MottakTopology(config)
+    val topology = MottakTopology(config, prometheus)
 
     kafka.connect(
         topology = topology(),

@@ -1,9 +1,14 @@
 package mottak.kafka
 
+import io.micrometer.core.instrument.MeterRegistry
+import libs.kafka.KeyValue
 import libs.kafka.Topology
+import libs.kafka.processor.Processor
+import libs.kafka.processor.ProcessorMetadata
 import libs.kafka.topology
 import mottak.Config
 import mottak.Journalpost
+import mottak.SECURE_LOG
 import mottak.arena.Arena
 import mottak.arena.ArenaClient
 import mottak.behandlingsflyt.Behandlingsflyt
@@ -27,8 +32,18 @@ private val IGNORED_MOTTAKSKANAL = listOf(
     "EKST_OPPS"
 )
 
+class MeterConsumed<T>(
+    private val registry: MeterRegistry,
+) : Processor<T, T>("consume-journalfoering-metrics") {
+    override fun process(metadata: ProcessorMetadata, keyValue: KeyValue<String, T>): T {
+        registry.counter("kafka_streams_consumed_filtered").increment()
+        return keyValue.value
+    }
+}
+
 class MottakTopology(
     config: Config,
+    private val registry: MeterRegistry,
     private val saf: Saf = SafClient(config),
     private val joark: Joark = JoarkClient(config),
     private val pdl: Pdl = PdlClient(config),
@@ -41,13 +56,20 @@ class MottakTopology(
 
     operator fun invoke(): Topology = topology {
         consume(topics.journalfoering)
-            .secureLogWithKey { key, value -> warn("key: $key value: $value") }
             .filter { record -> record.mottaksKanal !in IGNORED_MOTTAKSKANAL }
             .filter { record -> record.temaNytt == "AAP" }
-            .filter { record -> record.journalpostStatus == "M" }
+            .filter { record -> record.journalpostStatus == "MOTTATT" }
+            .processor(MeterConsumed(registry))
+            .secureLogWithKey { _, value -> trace("$value") }
             .map { record -> saf.hentJournalpost(record.journalpostId.toString()) }
             .filter { it.erSkjemaTilAAP() }
-            .filter { !it.erJournalført() } // todo logg hvis dette skjer (topic skal være up-to-date med saf)
+            .filter {
+                val erJournalført = !it.erJournalført()
+                if (erJournalført) {
+                    registry.counter("kafka_streams_consumed_journalfort").increment()
+                }
+                erJournalført
+            }
             .map { jp -> enrichWithNavEnhet(jp) }
             .forEach(::håndterJournalpost)
     }
@@ -56,10 +78,12 @@ class MottakTopology(
         return when (journalpost) {
             is Journalpost.MedIdent -> {
                 val personopplysninger = pdl.hentPersonopplysninger(journalpost.personident)
+
                 @Suppress("NAME_SHADOWING")
                 val journalpost = journalpost.copy(personident = personopplysninger.personident)
                 journalpost to enhetService.getNavEnhet(personopplysninger)
             }
+
             is Journalpost.UtenIdent -> {
                 journalpost to enhetService.getNavEnhetForFordelingsoppgave()
             }
@@ -82,10 +106,12 @@ class MottakTopology(
     }
 
     private fun håndterJournalpost(journalpost: Journalpost.UtenIdent) {
+        SECURE_LOG.info("Forsøker å rute journalpost uten ident")
         gosys.opprettOppgaveForManglendeIdent(journalpost)
     }
 
     private fun håndterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
+        SECURE_LOG.info("Forsøker å rute journalpost med ident")
         if (journalpost.erPliktkort()) {
             error("not implemented")
         }
@@ -97,7 +123,6 @@ class MottakTopology(
         } else {
             sakIkkeFunnet(journalpost, enhet)
         }
-
     }
 
     private fun skalTilKelvin(journalpost: Journalpost): Boolean {
@@ -105,10 +130,12 @@ class MottakTopology(
     }
 
     private fun sakIkkeFunnet(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
+        SECURE_LOG.info("Ingen eksisterende saker funnet for person.")
         when {
             journalpost.erEttersending() -> {
                 gosys.opprettManuellJournalføringsoppgave(journalpost)
             }
+
             journalpost.erSøknad() -> arenaOppgave(journalpost, enhet)
             journalpost.erPliktkort() -> {}
             else -> error("Uhåndtert skjema for journalpostId ${journalpost.journalpostId}")

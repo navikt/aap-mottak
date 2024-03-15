@@ -1,0 +1,50 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: mottak
+  namespace: aap
+  labels:
+    team: aap
+spec:
+  image: {{image}}
+  replicas:
+    max: 1
+    min: 1
+  azure:
+    application:
+      enabled: true
+  kafka:
+    pool: nav-dev
+    streams: true
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      memory: 512Mi
+  accessPolicy:
+    outbound:
+      external:
+        - host: dokarkiv.dev-fss-pub.nais.io
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: aap-fss-proxy.dev-fss-pub.nais.io
+        - host: saf.dev-fss-pub.nais.io
+        - host: oppgave.dev-fss-pub.nais.io
+      rules:
+        - application: skjermede-personer-pip
+          namespace: nom
+  liveness:
+    path: /actuator/live
+  readiness:
+    path: /actuator/ready
+  prometheus:
+    enabled: true
+    path: /actuator/metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: "java"
+  secureLogs:
+    enabled: true
+  env:
+    - name: FSS_ENV
+      value: -q2

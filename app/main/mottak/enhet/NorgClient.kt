@@ -8,6 +8,7 @@ import mottak.http.HttpClientFactory
 import mottak.http.tryInto
 import mottak.pdl.PdlGradering
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
+import java.net.URI
 
 interface Norg {
     fun hentArbeidsfordeling(
@@ -18,7 +19,7 @@ interface Norg {
 }
 
 class NorgClient(private val config: Config) : Norg {
-    private val host: String = config.norg.host
+    private val host: URI = config.norg.host
     private val httpClient = HttpClientFactory.create()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 

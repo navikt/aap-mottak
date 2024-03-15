@@ -4,50 +4,73 @@ import libs.kafka.StreamsConfig
 import no.nav.aap.ktor.client.auth.azure.AzureConfig
 import java.net.URI
 
-fun getEnvVar(envar: String) = System.getenv(envar) ?: error("missing envvar $envar")
-
 open class Config(
     val pdl: PdlConfig = PdlConfig(),
     val skjerming: SkjermingConfig = SkjermingConfig(),
     val norg: NorgConfig = NorgConfig(),
     val kafka: StreamsConfig = StreamsConfig(),
     val fssProxy: FssProxyConfig = FssProxyConfig(),
-    val gosys: GosysConfig = GosysConfig(),
+    val gosys: OppgaveConfig = OppgaveConfig(),
     val saf: SafConfig = SafConfig(),
-    val joark: JoarkConfig = JoarkConfig(),
+    val joark: DokarkivConfig = DokarkivConfig(),
     val azure: AzureConfig = AzureConfig(),
 )
 
 data class FssProxyConfig(
-    val host: String = getEnvVar("FSS_PROXY_HOST"),
-    val scope: String = getEnvVar("FSS_PROXY_SCOPE"),
+    private val env: Env = getEnv(),
+    val host: URI = "https://aap-fss-proxy.$env-fss-pub.nais.io".let(::URI),
+    val scope: String = "api://$env-fss.aap.fss-proxy/.default",
 )
 
-data class GosysConfig(
-    val host: String = getEnvVar("GOSYS_OPPGAVE_HOST"),
-    val scope: String = getEnvVar("GOSYS_OPPGAVE_SCOPE"),
+data class OppgaveConfig(
+    private val env: Env = getEnv(),
+    private val fssEnv: String = System.getenv("FSS_ENV") ?: "",
+    val host: URI = "https://oppgave.$env-fss-pub.nais.io".let(::URI),
+    val scope: String = "api://$env-fss.oppgavehandtering.oppgave${fssEnv}/.default",
 )
 
 data class SafConfig(
-    val host: String = getEnvVar("SAF_HOST"),
-    val scope: String = getEnvVar("SAF_SCOPE"),
+    private val env: Env = getEnv(),
+    private val fssEnv: String = System.getenv("FSS_ENV") ?: "",
+    val host: URI = "https://saf$fssEnv.$env-fss-pub.nais.io".let(::URI),
+    val scope: String = "$env-fss:teamdokumenthandtering:safselvbetjening",
 )
 
-data class JoarkConfig(
-    val host: String = getEnvVar("JOARK_HOST"),
-    val scope: String = getEnvVar("JOARK_SCOPE"),
-)
-
-data class NorgConfig(
-    val host: String = getEnvVar("NORG_HOST"),
+data class DokarkivConfig(
+    private val env: Env = getEnv(),
+    private val fssEnv: String = System.getenv("FSS_ENV") ?: "",
+    val host: URI = "https://dokarkiv$fssEnv.$env-fss-pub.nais.io".let(::URI),
+    val scope: String = "api://$env-fss.teamdokumenthandtering.dokarkiv$fssEnv/.default",
 )
 
 data class SkjermingConfig(
-    val host: String = getEnvVar("SKJERMING_HOST"),
+    private val env: Env = getEnv(),
+    val host: URI = "http://skjermede-personer-pip.nom".let(::URI),
+    val scope: String = "api://$env-gcp.nom.skjermede-personer-pip/.default",
 )
 
-data class PdlConfig(
-    val host: URI = getEnvVar("PDL_HOST").let(::URI),
-    val scope: String = getEnvVar("PDL_SCOPE"),
-    val audience: String = getEnvVar("PDL_AUDIENCE"),
+data class NorgConfig(
+    private val env: Env = getEnv(),
+    val host: URI = "https://norg2.$env-fss-pub.nais.io".let(::URI),
 )
+
+class PdlConfig(
+    private val env: Env = getEnv(),
+    val host: URI = "https://pdl-api.$env-fss-pub.nais.io/graphql".let(::URI),
+    val scope: String = "api://$env-fss.pdl.pdl-api/.default",
+)
+
+fun getEnvVar(envar: String) = System.getenv(envar) ?: error("missing envvar $envar")
+
+fun getEnv(): Env = getEnvVar("NAIS_CLUSTER_NAME")
+    .substringBefore("-")
+    .let(Env::from)
+
+enum class Env {
+    dev,
+    prod;
+
+    companion object {
+        fun from(env: String) = valueOf(env)
+    }
+}

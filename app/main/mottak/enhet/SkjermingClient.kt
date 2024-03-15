@@ -7,6 +7,7 @@ import mottak.Config
 import mottak.Ident
 import mottak.http.HttpClientFactory
 import mottak.http.tryInto
+import java.net.URI
 
 interface Skjerming {
     fun isSkjermet(personident: Ident.Personident): Boolean
@@ -14,7 +15,7 @@ interface Skjerming {
 
 class SkjermingClient(config: Config) : Skjerming {
     private val httpClient = HttpClientFactory.create()
-    private val host: String = config.skjerming.host
+    private val host: URI = config.skjerming.host
 
     override fun isSkjermet(personident: Ident.Personident): Boolean {
         val body = SkjermingReq(personident.id)

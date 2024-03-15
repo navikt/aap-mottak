@@ -14,13 +14,12 @@ class TestConfig : Config(
     pdl = PdlConfig(
         host = URI.create("http://localhost:${Ports.randomAvailable()}"),
         scope = "",
-        audience = ""
     ),
     skjerming = SkjermingConfig(
-        host = "http://localhost:${Ports.randomAvailable()}",
+        host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
     ),
     norg = NorgConfig(
-        host = "http://localhost:${Ports.randomAvailable()}",
+        host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
     ),
     kafka = StreamsConfig(
         applicationId = "",
@@ -37,19 +36,19 @@ class TestConfig : Config(
         )
     ),
     fssProxy = FssProxyConfig(
-        host = "http://localhost:${Ports.randomAvailable()}",
+        host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
         scope = "",
     ),
-    gosys = GosysConfig(
-        host = "http://localhost:${Ports.randomAvailable()}",
+    gosys = OppgaveConfig(
+        host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
         scope = "",
     ),
     saf = SafConfig(
-        host = "http://localhost:${Ports.randomAvailable()}",
+        host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
         scope = "",
     ),
-    joark = JoarkConfig(
-        host = "http://localhost:${Ports.randomAvailable()}",
+    joark = DokarkivConfig(
+        host = "http://localhost:${Ports.randomAvailable()}".let(::URI),
         scope = "",
     ),
     azure = AzureConfig(

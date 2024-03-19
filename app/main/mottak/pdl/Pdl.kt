@@ -21,7 +21,7 @@ interface Pdl {
 }
 
 class PdlClient(private val config: Config) : Pdl {
-    private val httpClient = HttpClientFactory.create()
+    private val httpClient = HttpClientFactory.default()
     private val host = config.pdl.host.toURL()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 

@@ -21,7 +21,7 @@ interface Gosys {
 }
 
 class GosysClient(private val config: Config) : Gosys {
-    private val httpClient = HttpClientFactory.create()
+    private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent) {

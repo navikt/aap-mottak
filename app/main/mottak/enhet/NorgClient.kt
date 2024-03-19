@@ -20,7 +20,7 @@ interface Norg {
 
 class NorgClient(private val config: Config) : Norg {
     private val host: URI = config.norg.host
-    private val httpClient = HttpClientFactory.create()
+    private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun hentArbeidsfordeling(

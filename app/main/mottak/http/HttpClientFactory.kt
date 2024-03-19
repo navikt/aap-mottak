@@ -13,13 +13,11 @@ import io.ktor.serialization.jackson.*
 import mottak.SECURE_LOG
 
 internal object HttpClientFactory {
-    fun create(): HttpClient = HttpClient(CIO) {
+    fun default(): HttpClient = HttpClient(CIO) {
         install(HttpRequestRetry)
 
         install(Logging) {
-            logger = object : Logger {
-                override fun log(message: String) = SECURE_LOG.info(message)
-            }
+            logger = SecureLog.INFO
             level = LogLevel.ALL
         }
 
@@ -30,6 +28,12 @@ internal object HttpClientFactory {
                 setSerializationInclusion(JsonInclude.Include.NON_NULL)
                 registerModule(JavaTimeModule())
             }
+        }
+    }
+
+    object SecureLog {
+        object INFO : Logger {
+            override fun log(message: String) = SECURE_LOG.info(message)
         }
     }
 }

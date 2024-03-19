@@ -19,7 +19,7 @@ const val FORDELINGSOPPGAVE = "FDR"
 const val JOURNALORINGSOPPGAVE = "JFR"
 
 class JoarkClient(private val config: Config) : Joark {
-    private val httpClient = HttpClientFactory.create()
+    private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet) {

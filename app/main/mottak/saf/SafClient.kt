@@ -17,7 +17,7 @@ interface Saf {
 }
 
 class SafClient(private val config: Config) : Saf {
-    private val httpClient = HttpClientFactory.create()
+    private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun hentJournalpost(journalpostId: String): Journalpost {

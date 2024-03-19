@@ -17,7 +17,7 @@ interface Arena {
 }
 
 class ArenaClient(private val config: Config) : Arena {
-    private val httpClient = HttpClientFactory.create()
+    private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun finnesSak(journalpost: Journalpost.MedIdent): Boolean {

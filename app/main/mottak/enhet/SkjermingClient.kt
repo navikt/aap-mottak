@@ -14,7 +14,7 @@ interface Skjerming {
 }
 
 class SkjermingClient(config: Config) : Skjerming {
-    private val httpClient = HttpClientFactory.create()
+    private val httpClient = HttpClientFactory.default()
     private val host: URI = config.skjerming.host
 
     override fun isSkjermet(personident: Ident.Personident): Boolean {

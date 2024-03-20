@@ -25,9 +25,8 @@ data class FssProxyConfig(
 
 data class OppgaveConfig(
     private val env: Env = getEnv(),
-    private val fssEnv: String = System.getenv("FSS_ENV") ?: "",
     val host: URI = "https://oppgave.$env-fss-pub.nais.io".let(::URI),
-    val scope: String = "api://$env-fss.oppgavehandtering.oppgave${fssEnv}/.default",
+    val scope: String = "api://$env-fss.oppgavehandtering.oppgave/.default",
 )
 
 data class SafConfig(

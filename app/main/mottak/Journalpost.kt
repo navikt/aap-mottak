@@ -1,8 +1,10 @@
 package mottak
 
-const val SKJEMANUMMER_SØKNAD = "NAV 11-13.05"
-const val SKJEMANUMMER_SØKNAD_ETTERSENDING = "NAVe 11-13.05"
+const val SKJEMANUMMER_SØKNAD = "NAV 11-13.05" // automatisk
+const val SKJEMANUMMER_SØKNAD_ETTERSENDING = "NAVe 11-13.05" // automatisk
 const val SKJEMANUMMER_PLIKTKORT = "TODO"
+// 11-12.05 reisestønad automatisk
+// e11-12.05 ettersendelse reisestønad automatisk
 
 sealed class Journalpost(
     open val journalpostId: String,

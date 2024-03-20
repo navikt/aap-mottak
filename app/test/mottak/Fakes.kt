@@ -6,7 +6,7 @@ import mottak.enhet.ArbeidsfordelingDtoResponse
 import mottak.enhet.NavEnhet
 import mottak.enhet.Norg
 import mottak.enhet.Skjerming
-import mottak.gosys.Gosys
+import mottak.oppgave.Oppgave
 import mottak.joark.Joark
 import mottak.pdl.Pdl
 import mottak.pdl.PdlGradering
@@ -74,7 +74,7 @@ object ArenaFake : Arena {
 
 }
 
-object GosysFake : Gosys {
+object OppgaveFake : Oppgave {
     private val automatiskeOppgaver = mutableListOf<Pair<String, NavEnhet>>()
     private val manuelleOppgaver = mutableListOf<String>()
     private val identitetsløseOppgaver = mutableListOf<String>()

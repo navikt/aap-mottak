@@ -26,7 +26,7 @@ class StreamsTest {
             PdlFake,
             BehandlingsflytFake,
             ArenaFake,
-            GosysFake,
+            OppgaveFake,
             EnhetService(
                 NorgFake,
                 SkjermingFake,
@@ -56,7 +56,7 @@ class StreamsTest {
         }
 
         assertTrue(ArenaFake.harOpprettetOppgaveMedId("123"))
-        assertTrue(GosysFake.harOpprettetAutomatiskOppgave("123", NavEnhet("oslo")))
+        assertTrue(OppgaveFake.harOpprettetAutomatiskOppgave("123", NavEnhet("oslo")))
         assertTrue(JoarkFake.harOppdatert("123", NavEnhet("oslo")))
     }
 }

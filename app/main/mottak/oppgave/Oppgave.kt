@@ -1,4 +1,4 @@
-package mottak.gosys
+package mottak.oppgave
 
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -14,13 +14,13 @@ import mottak.enhet.NavEnhet
 import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
-interface Gosys {
+interface Oppgave {
     fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent)
     fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent)
     fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet)
 }
 
-class GosysClient(private val config: Config) : Gosys {
+class OppgaveClient(private val config: Config) : Oppgave {
     private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 

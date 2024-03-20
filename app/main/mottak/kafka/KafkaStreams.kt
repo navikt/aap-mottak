@@ -17,8 +17,8 @@ import mottak.enhet.EnhetService
 import mottak.enhet.NavEnhet
 import mottak.enhet.NorgClient
 import mottak.enhet.SkjermingClient
-import mottak.gosys.Gosys
-import mottak.gosys.GosysClient
+import mottak.oppgave.Oppgave
+import mottak.oppgave.OppgaveClient
 import mottak.joark.Joark
 import mottak.joark.JoarkClient
 import mottak.pdl.Pdl
@@ -49,7 +49,7 @@ class MottakTopology(
     private val pdl: Pdl = PdlClient(config),
     private val kelvin: Behandlingsflyt = BehandlingsflytClient(config),
     private val arena: Arena = ArenaClient(config),
-    private val gosys: Gosys = GosysClient(config),
+    private val oppgave: Oppgave = OppgaveClient(config),
     private val enhetService: EnhetService = EnhetService(NorgClient(config), SkjermingClient(config)),
 ) {
     private val topics = Topics(config.kafka)
@@ -107,7 +107,7 @@ class MottakTopology(
 
     private fun håndterJournalpost(journalpost: Journalpost.UtenIdent) {
         SECURE_LOG.info("Forsøker å rute journalpost uten ident")
-        gosys.opprettOppgaveForManglendeIdent(journalpost)
+        oppgave.opprettOppgaveForManglendeIdent(journalpost)
     }
 
     private fun håndterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
@@ -117,7 +117,7 @@ class MottakTopology(
         }
 
         if (arena.finnesSak(journalpost)) {
-            gosys.opprettManuellJournalføringsoppgave(journalpost)
+            oppgave.opprettManuellJournalføringsoppgave(journalpost)
         } else if (skalTilKelvin(journalpost)) {
             kelvin.finnEllerOpprettSak(journalpost)
         } else {
@@ -133,7 +133,7 @@ class MottakTopology(
         SECURE_LOG.info("Ingen eksisterende saker funnet for person.")
         when {
             journalpost.erEttersending() -> {
-                gosys.opprettManuellJournalføringsoppgave(journalpost)
+                oppgave.opprettManuellJournalføringsoppgave(journalpost)
             }
 
             journalpost.erSøknad() -> arenaOppgave(journalpost, enhet)
@@ -144,6 +144,6 @@ class MottakTopology(
 
     private fun arenaOppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         val saksnummer = arena.opprettOppgave(journalpost)
-        gosys.opprettAutomatiskJournalføringsoppgave(journalpost, enhet)
+        oppgave.opprettAutomatiskJournalføringsoppgave(journalpost, enhet)
     }
 }

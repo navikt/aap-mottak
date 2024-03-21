@@ -11,7 +11,7 @@ data class SafRespons(
 )
 
 data class SafData(
-    val journalpostById: SafJournalpost?
+    val journalpost: SafJournalpost?
 )
 
 data class SafJournalpost(
@@ -30,7 +30,7 @@ data class SafJournalpost(
     /**
      * Inngående, utgående eller notat
      */
-    val journalposttype: Journalposttype,
+    val journalposttype: Journalposttype? = null,
 
     /**
      * Status på journalposten i joark
@@ -47,6 +47,21 @@ data class SafJournalpost(
     val tema: String? = null,
 
     /**
+     * Dekode av Tema, f.eks "Foreldrepenger"
+     */
+    val temanavn: String? = null,
+
+    /**
+     * Detaljering av tema på journalpost og tilhørende sak. f.eks "ab0072"
+     */
+    val behandlingstema: String? = null,
+
+    /**
+     * Dekode av behandlingsteypa, feks "Foreldrepenger ved adopsjon"
+     */
+    val behandlingstemanavn: String? = null,
+
+    /**
      * Sier hvilken sak journalposten er knyttet til.
      * En journalpost kan maksimalt være knyttet til èn sak,
      * men et dokument kan være knyttet til fler journalposter og dermed fler saker.
@@ -54,14 +69,21 @@ data class SafJournalpost(
     val sak: Sak,
 
     /**
-     * Personen eller organisasjonen som er avsender av dokumentene i journalposten.
+     * Person eller org som dokumentene i journalposten gjelder.
+     * Dersom journalpost er sakstilknyttet, henter SAF bruker fra GSAK/PSAK,
+     * alternativt fra Joark.
      */
-    val avsender: AvsenderMottaker? = null,
+    val bruker: Bruker? = null,
 
     /**
-     * Personen eller organisasjonen som er mottaker av dokumentene i journalposten.
+     * Person eller org som er avsender/mottaker av dokument i journalpost
      */
-    val mottaker: AvsenderMottaker? = null,
+    val avsenderMottaker: AvsenderMottaker? = null,
+
+    /**
+     * NAV-enhet som har journalført forsendelsen.
+     */
+    val journalfoerendeEnhet: String? = null,
 
     /**
      * Kanalen dokumentene ble mottatt i eller sendt ut på.
@@ -81,7 +103,7 @@ data class SafJournalpost(
      * Typen avhenger av journalposttypen.
      * @example: DATO_EKSPEDERT
      */
-    val relevanteDatoer: List<SafRelevantDato?>,
+    val relevanteDatoer: List<SafRelevantDato?>?,
 
     /**
      * Liste over dokumentinfo tilknyttet journalposten.
@@ -296,6 +318,17 @@ enum class SafDatoType {
     DATO_OPPRETTET, DATO_SENDT_PRINT, DATO_EKSPEDERT,
     DATO_JOURNALFOERT, DATO_REGISTRERT,
     DATO_AVS_RETUR, DATO_DOKUMENT
+}
+
+data class Bruker(
+    val id: String? = null,
+    val type: BrukerIdType? = null,
+)
+
+enum class BrukerIdType {
+    AKTOERID,
+    FNR,
+    ORGNR
 }
 
 data class SafDokumentInfo(

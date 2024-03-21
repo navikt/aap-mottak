@@ -60,11 +60,11 @@ internal fun Application.safFake() {
             call.respond(
                 SafRespons(
                     data = SafData(
-                        journalpostById = SafJournalpost(
+                        journalpost = SafJournalpost(
                             journalpostId = 123,
                             journalposttype = Journalposttype.I,
-                            avsender = AvsenderMottaker("123", AvsenderMottakerIdType.FNR),
                             relevanteDatoer = emptyList(),
+                            bruker = Bruker("123", BrukerIdType.FNR),
                             sak = Sak(
                                 fagsaksystem = "Kelvin",
                                 sakstype = Sakstype.FAGSAK,

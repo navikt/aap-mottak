@@ -17,30 +17,35 @@ private const val journalpostId = "\$journalpostId"
 
 private val journalpost = """
     query($journalpostId: String!) {
-        journalpostById(journalpostId: $journalpostId) {
-            journalpostId
+      journalpost(journalpostId: $journalpostId) {
+        journalposter {
+          journalpostId
+          tittel
+          journalposttype
+          journalstatus
+          tema
+          temanavn
+          behandlingstema
+          behandlingstemanavn
+          sak {
+            fagsakId
+            fagsaksystem
+            sakstype
+            tema
+          }
+          bruker {
+            id
+            type
+          }
+          journalfoerendeEnhet
+          eksternReferanseId
+          dokumenter {
+            dokumentInfoId
             tittel
-            journalposttype
-            eksternReferanseId
-            relevanteDatoer {
-                dato
-                datotype
-            }
-            avsender {
-                id
-                type
-            }
-            dokumenter {
-                dokumentInfoId
-                brevkode
-                tittel
-                dokumentvarianter {
-                    variantformat
-                    brukerHarTilgang
-                    filtype
-                }
-            }
-        } 
+            brevkode
+          }
+        }
+      }
     }
 """.trimIndent()
 

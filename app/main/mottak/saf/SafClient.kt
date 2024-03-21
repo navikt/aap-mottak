@@ -21,13 +21,14 @@ class SafClient(private val config: Config) : Saf {
         val request = SafRequest.hentJournalpost(journalpostId)
         val response = runBlocking { graphqlQuery(request) }
 
-        val journalpost: SafJournalpost = response.data?.journalpostById
+        val journalpost: SafJournalpost = response.data?.journalpost
             ?: error("Fant ikke journalpost for $journalpostId")
 
-        val ident = when (journalpost.avsender?.type) {
-            AvsenderMottakerIdType.FNR -> Ident.Personident(journalpost.avsender.id)
+        val ident = when (journalpost.bruker?.type) {
+            BrukerIdType.AKTOERID -> Ident.Aktørid(journalpost.bruker.id!!)
+            BrukerIdType.FNR -> Ident.Personident(journalpost.bruker.id!!)
             else -> null.also {
-                SECURE_LOG.warn("mottok noe annet enn personnr: ${journalpost.avsender?.type}")
+                SECURE_LOG.warn("mottok noe annet enn personnr: ${journalpost.bruker?.type}")
             }
         }
 

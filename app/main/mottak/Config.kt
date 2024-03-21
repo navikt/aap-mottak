@@ -33,7 +33,7 @@ data class SafConfig(
     private val env: Env = getEnv(),
     private val fssEnv: String = System.getenv("FSS_ENV") ?: "",
     val host: URI = "https://saf$fssEnv.$env-fss-pub.nais.io".let(::URI),
-    val scope: String = "api://$env-fss:teamdokumenthandtering:saf/.default",
+    val scope: String = "api://$env-fss.teamdokumenthandtering.saf/.default",
 )
 
 data class DokarkivConfig(

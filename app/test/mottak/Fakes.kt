@@ -6,12 +6,13 @@ import mottak.enhet.ArbeidsfordelingDtoResponse
 import mottak.enhet.NavEnhet
 import mottak.enhet.Norg
 import mottak.enhet.Skjerming
-import mottak.oppgave.Oppgave
 import mottak.joark.Joark
+import mottak.oppgave.Oppgave
 import mottak.pdl.Pdl
 import mottak.pdl.PdlGradering
 import mottak.pdl.Personopplysninger
 import mottak.saf.Saf
+import java.util.*
 
 object JoarkFake : Joark {
     private val oppdaterteJournalposter = mutableListOf<Pair<Journalpost, NavEnhet>>()
@@ -28,14 +29,19 @@ object JoarkFake : Joark {
 }
 
 object BehandlingsflytFake : Behandlingsflyt {
-    override fun finnEllerOpprettSak(journalpost: Journalpost): Boolean {
-        return false
+    private val saker = mutableListOf<Journalpost>()
+    override fun finnEllerOpprettSak(journalpost: Journalpost): String {
+        saker.add(journalpost)
+        return UUID.randomUUID().toString()
     }
 
     override fun manuellJournaløring(journalpost: Journalpost) {
         TODO("Not yet implemented")
     }
 
+    fun harOpprettetSak(journalpostId: Long): Boolean {
+        return saker.any { it.journalpostId == journalpostId }
+    }
 }
 
 object SkjermingFake : Skjerming {

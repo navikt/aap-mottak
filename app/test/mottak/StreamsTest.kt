@@ -55,7 +55,7 @@ class StreamsTest {
             }.build()
         }
 
-        // TODO: assert happy path mot kelvin i stedenfor
+        assertTrue(BehandlingsflytFake.harOpprettetSak(123))
 //        assertTrue(ArenaFake.harOpprettetOppgaveMedId(123))
 //        assertTrue(OppgaveFake.harOpprettetAutomatiskOppgave(123, NavEnhet("oslo")))
 //        assertTrue(JoarkFake.harOppdatert(123, NavEnhet("oslo")))

@@ -55,8 +55,8 @@ class StreamsTest {
             }.build()
         }
 
-        assertTrue(ArenaFake.harOpprettetOppgaveMedId("123"))
-        assertTrue(OppgaveFake.harOpprettetAutomatiskOppgave("123", NavEnhet("oslo")))
-        assertTrue(JoarkFake.harOppdatert("123", NavEnhet("oslo")))
+        assertTrue(ArenaFake.harOpprettetOppgaveMedId(123))
+        assertTrue(OppgaveFake.harOpprettetAutomatiskOppgave(123, NavEnhet("oslo")))
+        assertTrue(JoarkFake.harOppdatert(123, NavEnhet("oslo")))
     }
 }

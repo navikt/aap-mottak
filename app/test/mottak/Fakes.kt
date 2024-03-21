@@ -20,7 +20,7 @@ object JoarkFake : Joark {
         oppdaterteJournalposter.add(journalpost to enhet)
     }
 
-    fun harOppdatert(journalpostId: String, enhet: NavEnhet): Boolean {
+    fun harOppdatert(journalpostId: Long, enhet: NavEnhet): Boolean {
         return oppdaterteJournalposter.any {
             it.first.journalpostId == journalpostId && it.second == enhet
         }
@@ -57,7 +57,7 @@ object NorgFake : Norg {
 }
 
 object ArenaFake : Arena {
-    private val saker = mutableListOf<String>()
+    private val saker = mutableListOf<Long>()
 
     override fun finnesSak(journalpost: Journalpost.MedIdent): Boolean {
         return false
@@ -68,16 +68,16 @@ object ArenaFake : Arena {
         saker.add(journalpost.journalpostId)
     }
 
-    fun harOpprettetOppgaveMedId(id: String): Boolean {
-        return saker.any { it == id }
+    fun harOpprettetOppgaveMedId(journalpostId: Long): Boolean {
+        return saker.any { it == journalpostId }
     }
 
 }
 
 object OppgaveFake : Oppgave {
-    private val automatiskeOppgaver = mutableListOf<Pair<String, NavEnhet>>()
-    private val manuelleOppgaver = mutableListOf<String>()
-    private val identitetsløseOppgaver = mutableListOf<String>()
+    private val automatiskeOppgaver = mutableListOf<Pair<Long, NavEnhet>>()
+    private val manuelleOppgaver = mutableListOf<Long>()
+    private val identitetsløseOppgaver = mutableListOf<Long>()
 
     override fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent) {
         manuelleOppgaver.add(journalpost.journalpostId)
@@ -91,15 +91,15 @@ object OppgaveFake : Oppgave {
         automatiskeOppgaver.add(journalpost.journalpostId to enhet)
     }
 
-    fun harOpprettetAutomatiskOppgave(id: String, enhet: NavEnhet): Boolean {
-        return automatiskeOppgaver.any { it.first == id && it.second == enhet }
+    fun harOpprettetAutomatiskOppgave(journalpostId: Long, enhet: NavEnhet): Boolean {
+        return automatiskeOppgaver.any { it.first == journalpostId && it.second == enhet }
     }
 }
 
 object SafFake : Saf {
-    override fun hentJournalpost(journalpostId: String): Journalpost {
+    override fun hentJournalpost(journalpostId: Long): Journalpost {
         return Journalpost.MedIdent(
-            journalpostId = "123",
+            journalpostId = 123,
             erPliktkort = false,
             personident = Ident.Personident("1"),
             status = JournalpostStatus.MOTTATT,

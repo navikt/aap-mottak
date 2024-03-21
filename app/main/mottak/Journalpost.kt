@@ -7,7 +7,7 @@ const val SKJEMANUMMER_PLIKTKORT = "TODO"
 // e11-12.05 ettersendelse reisestønad automatisk
 
 sealed class Journalpost(
-    open val journalpostId: String,
+    open val journalpostId: Long,
     private val status: JournalpostStatus,
     private val skjemanummer: String,
 ) {
@@ -24,14 +24,14 @@ sealed class Journalpost(
     }
 
     class UtenIdent(
-        journalpostId: String,
+        journalpostId: Long,
         status: JournalpostStatus,
         skjemanummer: String,
     ) : Journalpost(journalpostId, status, skjemanummer)
 
     data class MedIdent(
         val personident: Ident,
-        override val journalpostId: String,
+        override val journalpostId: Long,
         private val erPliktkort: Boolean,
         private val skjemanummer: String,
         private val status: JournalpostStatus,

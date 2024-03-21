@@ -56,12 +56,9 @@ class MottakTopology(
 
     operator fun invoke(): Topology = topology {
         consume(topics.journalfoering)
-            .filter { record -> record.mottaksKanal !in IGNORED_MOTTAKSKANAL }
             .filter { record -> record.temaNytt == "AAP" }
-            .filter { record -> record.journalpostStatus == "MOTTATT" }
             .processor(MeterConsumed(registry))
-            .secureLogWithKey { _, value -> trace("$value") }
-            .map { record -> saf.hentJournalpost(record.journalpostId.toString()) }
+            .map { record -> saf.hentJournalpost(record.journalpostId) }
             .filter { it.erSkjemaTilAAP() }
             .filter {
                 val erJournalført = !it.erJournalført()

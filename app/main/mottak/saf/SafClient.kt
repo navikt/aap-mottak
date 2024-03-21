@@ -4,32 +4,31 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
-import mottak.Config
-import mottak.Ident
-import mottak.Journalpost
-import mottak.JournalpostStatus
+import mottak.*
 import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 import java.util.*
 
 interface Saf {
-    fun hentJournalpost(journalpostId: String): Journalpost
+    fun hentJournalpost(journalpostId: Long): Journalpost
 }
 
 class SafClient(private val config: Config) : Saf {
     private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    override fun hentJournalpost(journalpostId: String): Journalpost {
-        val journalpost = runBlocking {
-            graphqlQuery(SafRequest.hentJournalpost(journalpostId)).data?.journalpostById
-                ?: throw Exception("Fant ikke journalpost for $journalpostId")
-        }
+    override fun hentJournalpost(journalpostId: Long): Journalpost {
+        val request = SafRequest.hentJournalpost(journalpostId)
+        val response = runBlocking { graphqlQuery(request) }
 
-        val ident = when (journalpost.bruker?.type) {
-            SafJournalpost.Ident.IdType.FNR -> Ident.Personident(journalpost.bruker.id)
-            SafJournalpost.Ident.IdType.AKTOERID -> Ident.Aktørid(journalpost.bruker.id)
-            SafJournalpost.Ident.IdType.UKJENT, null -> null
+        val journalpost: SafJournalpost = response.data?.journalpostById
+            ?: error("Fant ikke journalpost for $journalpostId")
+
+        val ident = when (journalpost.avsender?.type) {
+            AvsenderMottakerIdType.FNR -> Ident.Personident(journalpost.avsender.id)
+            else -> null.also {
+                SECURE_LOG.warn("mottok noe annet enn personnr: ${journalpost.avsender?.type}")
+            }
         }
 
         return if (ident == null) {

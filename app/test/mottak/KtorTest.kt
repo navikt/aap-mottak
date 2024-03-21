@@ -9,10 +9,7 @@ import io.ktor.server.testing.*
 import lib.kafka.StreamsMock
 import mottak.kafka.Topics
 import mottak.pdl.PdlResponse
-import mottak.saf.SafData
-import mottak.saf.SafDokumentoversikt
-import mottak.saf.SafJournalpost
-import mottak.saf.SafRespons
+import mottak.saf.*
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.junit.jupiter.api.Test
 
@@ -63,24 +60,18 @@ internal fun Application.safFake() {
             call.respond(
                 SafRespons(
                     data = SafData(
-                        dokumentoversiktSelvbetjening = SafDokumentoversikt(
-                            journalposter = listOf(
-                                SafJournalpost(
-                                    journalpostId = "123",
-                                    journalposttype = "M",
-                                    eksternReferanseId = null,
-                                    tittel = null,
-                                    bruker = SafJournalpost.Ident("123", SafJournalpost.Ident.IdType.FNR),
-                                    relevanteDatoer = emptyList(),
-                                    dokumenter = null
-                                )
+                        journalpostById = SafJournalpost(
+                            journalpostId = 123,
+                            journalposttype = Journalposttype.I,
+                            avsender = AvsenderMottaker("123", AvsenderMottakerIdType.FNR),
+                            relevanteDatoer = emptyList(),
+                            sak = Sak(
+                                fagsaksystem = "Kelvin",
+                                sakstype = Sakstype.FAGSAK,
                             )
-                        ),
-                        journalpostById = null,
-                    ),
-                    errors = null,
-                    extensions = null
-                )
+                        )
+                    )
+                ),
             )
         }
     }

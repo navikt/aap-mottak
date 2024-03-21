@@ -5,6 +5,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import mottak.*
+import mottak.enhet.NavEnhet
 import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 import java.util.*
@@ -44,6 +45,7 @@ class SafClient(private val config: Config) : Saf {
                 personident = ident,
                 status = JournalpostStatus.UKJENT,
                 erPliktkort = false,
+                journalførendeEnhet = journalpost.journalfoerendeEnhet?.let(::NavEnhet),
                 skjemanummer = ""
             )
         }

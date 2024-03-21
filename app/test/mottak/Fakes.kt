@@ -103,6 +103,7 @@ object SafFake : Saf {
             erPliktkort = false,
             personident = Ident.Personident("1"),
             status = JournalpostStatus.MOTTATT,
+            journalførendeEnhet = NavEnhet("oslo"),
             skjemanummer = SKJEMANUMMER_SØKNAD
         )
     }

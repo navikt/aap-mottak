@@ -1,5 +1,7 @@
 package mottak
 
+import mottak.enhet.NavEnhet
+
 const val SKJEMANUMMER_SØKNAD = "NAV 11-13.05" // automatisk
 const val SKJEMANUMMER_SØKNAD_ETTERSENDING = "NAVe 11-13.05" // automatisk
 const val SKJEMANUMMER_PLIKTKORT = "TODO"
@@ -15,11 +17,9 @@ sealed class Journalpost(
         return status == JournalpostStatus.JOURNALFØRT
     }
 
-    fun erSkjemaTilAAP(): Boolean {
+    fun erSøknad(): Boolean {
         return skjemanummer in listOf(
             SKJEMANUMMER_SØKNAD,
-            SKJEMANUMMER_SØKNAD_ETTERSENDING,
-            SKJEMANUMMER_PLIKTKORT,
         )
     }
 
@@ -31,6 +31,7 @@ sealed class Journalpost(
 
     data class MedIdent(
         val personident: Ident,
+        val journalførendeEnhet: NavEnhet?,
         override val journalpostId: Long,
         private val erPliktkort: Boolean,
         private val skjemanummer: String,
@@ -43,10 +44,6 @@ sealed class Journalpost(
 
         fun erPliktkort(): Boolean {
             return skjemanummer == SKJEMANUMMER_PLIKTKORT
-        }
-
-        fun erSøknad(): Boolean {
-            return skjemanummer == SKJEMANUMMER_SØKNAD
         }
     }
 }

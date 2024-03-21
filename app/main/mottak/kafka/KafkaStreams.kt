@@ -17,20 +17,14 @@ import mottak.enhet.EnhetService
 import mottak.enhet.NavEnhet
 import mottak.enhet.NorgClient
 import mottak.enhet.SkjermingClient
-import mottak.oppgave.Oppgave
-import mottak.oppgave.OppgaveClient
 import mottak.joark.Joark
 import mottak.joark.JoarkClient
+import mottak.oppgave.Oppgave
+import mottak.oppgave.OppgaveClient
 import mottak.pdl.Pdl
 import mottak.pdl.PdlClient
 import mottak.saf.Saf
 import mottak.saf.SafClient
-
-private val IGNORED_MOTTAKSKANAL = listOf(
-    "EESSI",
-    "NAV_NO_CHAT",
-    "EKST_OPPS"
-)
 
 class MeterConsumed<T>(
     private val registry: MeterRegistry,
@@ -57,28 +51,23 @@ class MottakTopology(
     operator fun invoke(): Topology = topology {
         consume(topics.journalfoering)
             .filter { record -> record.temaNytt == "AAP" }
+            .filter { record -> record.journalpostStatus == "MOTTATT" }
             .processor(MeterConsumed(registry))
             .map { record -> saf.hentJournalpost(record.journalpostId) }
-            .filter { it.erSkjemaTilAAP() }
-            .filter {
-                val erJournalført = !it.erJournalført()
-                if (erJournalført) {
-                    registry.counter("kafka_streams_consumed_journalfort").increment()
-                }
-                erJournalført
-            }
+            .filter { it.erSøknad() }
+            .filter { !it.erJournalført() }
             .map { jp -> enrichWithNavEnhet(jp) }
             .forEach(::håndterJournalpost)
     }
 
+    @Suppress("NAME_SHADOWING")
     private fun enrichWithNavEnhet(journalpost: Journalpost): Pair<Journalpost, NavEnhet> {
         return when (journalpost) {
             is Journalpost.MedIdent -> {
                 val personopplysninger = pdl.hentPersonopplysninger(journalpost.personident)
-
-                @Suppress("NAME_SHADOWING")
                 val journalpost = journalpost.copy(personident = personopplysninger.personident)
-                journalpost to enhetService.getNavEnhet(personopplysninger)
+                val enhet = journalpost.journalførendeEnhet ?: enhetService.getNavEnhet(personopplysninger)
+                journalpost to enhet
             }
 
             is Journalpost.UtenIdent -> {
@@ -88,8 +77,6 @@ class MottakTopology(
     }
 
     private fun håndterJournalpost(
-        @Suppress("UNUSED_PARAMETER")
-        key: String,
         journalpostMedEnhet: Pair<Journalpost, NavEnhet>,
     ) {
         val (journalpost, enhet) = journalpostMedEnhet
@@ -98,13 +85,12 @@ class MottakTopology(
             is Journalpost.MedIdent -> håndterJournalpost(journalpost, enhet)
             is Journalpost.UtenIdent -> håndterJournalpost(journalpost)
         }
-
-        joark.oppdaterJournalpost(journalpost, enhet)
     }
 
     private fun håndterJournalpost(journalpost: Journalpost.UtenIdent) {
         SECURE_LOG.info("Forsøker å rute journalpost uten ident")
-        oppgave.opprettOppgaveForManglendeIdent(journalpost)
+//        joark.oppdaterJournalpost(journalpost, enhet)
+//        oppgave.opprettOppgaveForManglendeIdent(journalpost)
     }
 
     private fun håndterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
@@ -114,23 +100,25 @@ class MottakTopology(
         }
 
         if (arena.finnesSak(journalpost)) {
-            oppgave.opprettManuellJournalføringsoppgave(journalpost)
+            SECURE_LOG.info("Fant eksisterende sak for person i arena.")
+//            oppgave.opprettManuellJournalføringsoppgave(journalpost)
         } else if (skalTilKelvin(journalpost)) {
             kelvin.finnEllerOpprettSak(journalpost)
+            joark.oppdaterJournalpost(journalpost, enhet)
         } else {
             sakIkkeFunnet(journalpost, enhet)
         }
     }
 
     private fun skalTilKelvin(journalpost: Journalpost): Boolean {
-        return false
+        return journalpost.erSøknad() // todo: midlertidig måte å si at den skal til kelvin på
     }
 
     private fun sakIkkeFunnet(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         SECURE_LOG.info("Ingen eksisterende saker funnet for person.")
         when {
             journalpost.erEttersending() -> {
-                oppgave.opprettManuellJournalføringsoppgave(journalpost)
+//                oppgave.opprettManuellJournalføringsoppgave(journalpost)
             }
 
             journalpost.erSøknad() -> arenaOppgave(journalpost, enhet)
@@ -140,7 +128,8 @@ class MottakTopology(
     }
 
     private fun arenaOppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
-        val saksnummer = arena.opprettOppgave(journalpost)
-        oppgave.opprettAutomatiskJournalføringsoppgave(journalpost, enhet)
+        SECURE_LOG.info("Oppretter oppgave i Arena for journalpost : ${journalpost.journalpostId}")
+//        val saksnummer = arena.opprettOppgave(journalpost)
+//        oppgave.opprettAutomatiskJournalføringsoppgave(journalpost, enhet)
     }
 }

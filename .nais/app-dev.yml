@@ -30,6 +30,7 @@ spec:
         - host: saf.dev-fss-pub.nais.io
         - host: oppgave.dev-fss-pub.nais.io
       rules:
+        - application: oppgavestyring
         - application: skjermede-personer-pip
           namespace: nom
   liveness:

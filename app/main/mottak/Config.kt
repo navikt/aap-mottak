@@ -15,6 +15,13 @@ open class Config(
     val saf: SafConfig = SafConfig(),
     val joark: DokarkivConfig = DokarkivConfig(),
     val azure: AzureConfig = AzureConfig(),
+    val behandlingsflyt: BehandlingflytConfig = BehandlingflytConfig(),
+)
+
+data class BehandlingflytConfig(
+    private val env: Env = getEnv(),
+    val host: URI = "http://behandlingsflyt".let(::URI),
+    val scope: String = "api://$env-gcp.nom.skjermede-personer-pip/.default",
 )
 
 data class FssProxyConfig(

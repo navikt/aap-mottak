@@ -30,12 +30,13 @@ object JoarkFake : Joark {
 
 object BehandlingsflytFake : Behandlingsflyt {
     private val saker = mutableListOf<Journalpost>()
-    override fun finnEllerOpprettSak(journalpost: Journalpost): String {
+
+    override fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): String {
         saker.add(journalpost)
         return UUID.randomUUID().toString()
     }
 
-    override fun manuellJournaløring(journalpost: Journalpost) {
+    override fun sendSøknad(sakId: String, journalpostId: Long, søknad: ByteArray) {
         TODO("Not yet implemented")
     }
 

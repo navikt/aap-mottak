@@ -89,8 +89,6 @@ class MottakTopology(
 
     private fun håndterJournalpost(journalpost: Journalpost.UtenIdent) {
         SECURE_LOG.info("Forsøker å rute journalpost uten ident")
-//        joark.oppdaterJournalpost(journalpost, enhet)
-//        oppgave.opprettOppgaveForManglendeIdent(journalpost)
     }
 
     private fun håndterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
@@ -101,7 +99,6 @@ class MottakTopology(
 
         if (arena.finnesSak(journalpost)) {
             SECURE_LOG.info("Fant eksisterende sak for person i arena.")
-//            oppgave.opprettManuellJournalføringsoppgave(journalpost)
         } else if (skalTilKelvin(journalpost)) {
             val saksinfo = kelvin.finnEllerOpprettSak(journalpost)
             joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer)
@@ -116,9 +113,10 @@ class MottakTopology(
 
     private fun sakIkkeFunnet(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         SECURE_LOG.info("Ingen eksisterende saker funnet for person.")
+        registry.counter("aap_ingen_saker_funnet").increment()
         when {
             journalpost.erEttersending() -> {
-//                oppgave.opprettManuellJournalføringsoppgave(journalpost)
+                registry.counter("aap_ettersendinger").increment()
             }
 
             journalpost.erSøknad() -> arenaOppgave(journalpost, enhet)
@@ -129,7 +127,5 @@ class MottakTopology(
 
     private fun arenaOppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         SECURE_LOG.info("Oppretter oppgave i Arena for journalpost : ${journalpost.journalpostId}")
-//        val saksnummer = arena.opprettOppgave(journalpost)
-//        oppgave.opprettAutomatiskJournalføringsoppgave(journalpost, enhet)
     }
 }

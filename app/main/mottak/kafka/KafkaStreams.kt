@@ -52,9 +52,10 @@ class MottakTopology(
         consume(topics.journalfoering)
             .filter { record -> record.temaNytt == "AAP" }
             .filter { record -> record.journalpostStatus == "MOTTATT" }
+            .filter { record -> record.mottaksKanal !in listOf("EESSI") }
             .processor(MeterConsumed(registry))
             .map { record -> saf.hentJournalpost(record.journalpostId) }
-            .filter { it.erSøknad() }
+            .filter { it.erSøknad() } // TODO dette er et midlertidig filter for happypath mot Kelvin
             .filter { !it.erJournalført() }
             .map { jp -> enrichWithNavEnhet(jp) }
             .forEach(::håndterJournalpost)
@@ -88,20 +89,18 @@ class MottakTopology(
     }
 
     private fun håndterJournalpost(journalpost: Journalpost.UtenIdent) {
-        SECURE_LOG.info("Forsøker å rute journalpost uten ident")
+
+        SECURE_LOG.info("Forsøker å rute journalpost ${journalpost.journalpostId} uten ident")
     }
 
     private fun håndterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         SECURE_LOG.info("Forsøker å rute journalpost med ident")
-        if (journalpost.erPliktkort()) {
-            error("not implemented")
-        }
 
-        if (arena.finnesSak(journalpost)) {
-            SECURE_LOG.info("Fant eksisterende sak for person i arena.")
-        } else if (skalTilKelvin(journalpost)) {
+         if (skalTilKelvin(journalpost)) {
             val saksinfo = kelvin.finnEllerOpprettSak(journalpost)
             joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer)
+             joark.ferdigstillJournalpost(journalpost, enhet)
+             // TODO: Send søknad til Kelvin
         } else {
             sakIkkeFunnet(journalpost, enhet)
         }

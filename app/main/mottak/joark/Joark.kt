@@ -13,6 +13,8 @@ import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 interface Joark {
     fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String)
+
+    fun ferdigstillJournalpost(journalpost: Journalpost, enhet: NavEnhet)
 }
 
 const val FORDELINGSOPPGAVE = "FDR"
@@ -27,7 +29,7 @@ class JoarkClient(private val config: Config) : Joark {
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.joark.scope)
             val response =
-                httpClient.put("${config.joark.host}/rest/journalpostapi/v1/journalpost/${journalpost.journalpostId}/ferdigstill") {
+                httpClient.put("${config.joark.host}/rest/journalpostapi/v1/journalpost/${journalpost.journalpostId}") {
                     accept(ContentType.Application.Json)
                     bearerAuth(token)
                     setBody(OppdaterJournalpostRequest(
@@ -38,7 +40,24 @@ class JoarkClient(private val config: Config) : Joark {
                     ))
                 }
             if (response.status.isSuccess()) {
-                SECURE_LOG.info("Ferdigstilte ${journalpost.journalpostId}")
+                SECURE_LOG.info("Oppdaterte ${journalpost.journalpostId}")
+            } else {
+                error("Feil mot Joark (${response.status}): ${response.bodyAsText()}")
+            }
+        }
+    }
+
+    override fun ferdigstillJournalpost(journalpost: Journalpost, enhet: NavEnhet) {
+        runBlocking {
+            val token = tokenProvider.getClientCredentialToken(config.joark.scope)
+            val response =
+                httpClient.put("${config.joark.host}/rest/journalpostapi/v1/journalpost/${journalpost.journalpostId}/ferdigstill") {
+                    accept(ContentType.Application.Json)
+                    bearerAuth(token)
+                    setBody(FerdigstillRequest(journalfoerendeEnhet = enhet.nr))
+                }
+            if (response.status.isSuccess()) {
+                SECURE_LOG.info("Ferdigstilt journalpost ${journalpost.journalpostId}")
             } else {
                 error("Feil mot Joark (${response.status}): ${response.bodyAsText()}")
             }

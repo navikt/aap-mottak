@@ -19,9 +19,14 @@ import java.util.*
 
 object JoarkFake : Joark {
     private val oppdaterteJournalposter = mutableListOf<Pair<Journalpost, NavEnhet>>()
+    private val ferdigstilteJournalposter = mutableListOf<Pair<Journalpost, NavEnhet>>()
 
     override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String) {
         oppdaterteJournalposter.add(journalpost to enhet)
+    }
+
+    override fun ferdigstillJournalpost(journalpost: Journalpost, enhet: NavEnhet) {
+        ferdigstilteJournalposter.add(journalpost to enhet)
     }
 
     fun harOppdatert(journalpostId: Long, enhet: NavEnhet): Boolean {

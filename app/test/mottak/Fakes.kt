@@ -2,6 +2,8 @@ package mottak
 
 import mottak.arena.Arena
 import mottak.behandlingsflyt.Behandlingsflyt
+import mottak.behandlingsflyt.Periode
+import mottak.behandlingsflyt.Saksinfo
 import mottak.enhet.ArbeidsfordelingDtoResponse
 import mottak.enhet.NavEnhet
 import mottak.enhet.Norg
@@ -12,12 +14,13 @@ import mottak.pdl.Pdl
 import mottak.pdl.PdlGradering
 import mottak.pdl.Personopplysninger
 import mottak.saf.Saf
+import java.time.LocalDate
 import java.util.*
 
 object JoarkFake : Joark {
     private val oppdaterteJournalposter = mutableListOf<Pair<Journalpost, NavEnhet>>()
 
-    override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet) {
+    override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String) {
         oppdaterteJournalposter.add(journalpost to enhet)
     }
 
@@ -31,9 +34,9 @@ object JoarkFake : Joark {
 object BehandlingsflytFake : Behandlingsflyt {
     private val saker = mutableListOf<Journalpost>()
 
-    override fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): String {
+    override fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): Saksinfo {
         saker.add(journalpost)
-        return UUID.randomUUID().toString()
+        return Saksinfo(UUID.randomUUID().toString(), Periode(LocalDate.now(), LocalDate.now()))
     }
 
     override fun sendSøknad(sakId: String, journalpostId: Long, søknad: ByteArray) {
@@ -111,7 +114,8 @@ object SafFake : Saf {
             personident = Ident.Personident("1"),
             status = JournalpostStatus.MOTTATT,
             journalførendeEnhet = NavEnhet("oslo"),
-            skjemanummer = SKJEMANUMMER_SØKNAD
+            skjemanummer = SKJEMANUMMER_SØKNAD,
+            mottattDato = LocalDate.now()
         )
     }
 }

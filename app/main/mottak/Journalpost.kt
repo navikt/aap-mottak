@@ -1,6 +1,7 @@
 package mottak
 
 import mottak.enhet.NavEnhet
+import java.time.LocalDate
 
 const val SKJEMANUMMER_SØKNAD = "NAV 11-13.05" // automatisk
 const val SKJEMANUMMER_SØKNAD_ETTERSENDING = "NAVe 11-13.05" // automatisk
@@ -12,6 +13,7 @@ sealed class Journalpost(
     open val journalpostId: Long,
     private val status: JournalpostStatus,
     private val skjemanummer: String,
+    private val mottattDato: LocalDate
 ) {
     fun erJournalført(): Boolean {
         return status == JournalpostStatus.JOURNALFØRT
@@ -23,11 +25,14 @@ sealed class Journalpost(
         )
     }
 
+    fun mottattDato() = mottattDato
+
     class UtenIdent(
         journalpostId: Long,
         status: JournalpostStatus,
         skjemanummer: String,
-    ) : Journalpost(journalpostId, status, skjemanummer)
+        mottattDato: LocalDate
+    ) : Journalpost(journalpostId, status, skjemanummer, mottattDato)
 
     data class MedIdent(
         val personident: Ident,
@@ -36,7 +41,8 @@ sealed class Journalpost(
         private val erPliktkort: Boolean,
         private val skjemanummer: String,
         private val status: JournalpostStatus,
-    ) : Journalpost(journalpostId, status, skjemanummer) {
+        private val mottattDato: LocalDate
+    ) : Journalpost(journalpostId, status, skjemanummer, mottattDato) {
 
         fun erEttersending(): Boolean {
             return skjemanummer == SKJEMANUMMER_SØKNAD_ETTERSENDING

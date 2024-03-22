@@ -33,11 +33,16 @@ class SafClient(private val config: Config) : Saf {
             }
         }
 
+        val mottattDato = journalpost.relevanteDatoer?.find { dato ->
+            dato?.datotype == SafDatoType.DATO_REGISTRERT
+        }?.dato?.toLocalDate() ?: error("Fant ikke dato")
+
         return if (ident == null) {
             Journalpost.UtenIdent(
                 journalpostId = journalpost.journalpostId,
                 status = JournalpostStatus.UKJENT,
-                skjemanummer = ""
+                skjemanummer = "",
+                mottattDato = mottattDato
             )
         } else {
             Journalpost.MedIdent(
@@ -46,7 +51,8 @@ class SafClient(private val config: Config) : Saf {
                 status = JournalpostStatus.UKJENT,
                 erPliktkort = false,
                 journalførendeEnhet = journalpost.journalfoerendeEnhet?.let(::NavEnhet),
-                skjemanummer = ""
+                skjemanummer = "",
+                mottattDato = mottattDato
             )
         }
     }

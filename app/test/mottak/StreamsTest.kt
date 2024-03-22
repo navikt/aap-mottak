@@ -9,8 +9,16 @@ import mottak.kafka.Topics
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import uk.org.webcompere.systemstubs.environment.EnvironmentVariables
+import uk.org.webcompere.systemstubs.jupiter.SystemStub
+import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension
 
+@ExtendWith(SystemStubsExtension::class)
 class StreamsTest {
+
+    @SystemStub
+    val naisCluster = EnvironmentVariables("NAIS_CLUSTER_NAME", "dev")
 
     @Test
     fun `Test hele greia`() {

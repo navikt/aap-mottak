@@ -12,7 +12,7 @@ import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 interface Joark {
-    fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet)
+    fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String)
 }
 
 const val FORDELINGSOPPGAVE = "FDR"
@@ -22,15 +22,20 @@ class JoarkClient(private val config: Config) : Joark {
     private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet) {
+    override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String) {
         // TODO: Oppdater med behandlende enhet og fagsak
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.joark.scope)
             val response =
-                httpClient.patch("${config.joark.host}/rest/journalpostapi/v1/journalpost/${journalpost.journalpostId}/ferdigstill") {
+                httpClient.put("${config.joark.host}/rest/journalpostapi/v1/journalpost/${journalpost.journalpostId}/ferdigstill") {
                     accept(ContentType.Application.Json)
                     bearerAuth(token)
-                    setBody(FerdigstillRequest(enhet.nr))
+                    setBody(OppdaterJournalpostRequest(
+                        journalfoerendeEnhet = enhet.nr,
+                        sak = JournalpostSak(
+                            fagsakId = fagsakId
+                        )
+                    ))
                 }
             if (response.status.isSuccess()) {
                 SECURE_LOG.info("Ferdigstilte ${journalpost.journalpostId}")
@@ -43,4 +48,16 @@ class JoarkClient(private val config: Config) : Joark {
 
 data class FerdigstillRequest(
     val journalfoerendeEnhet: String
+)
+
+data class OppdaterJournalpostRequest(
+    val behandlingstema: String? = null,
+    val journalfoerendeEnhet: String,
+    val sak: JournalpostSak
+)
+
+data class JournalpostSak(
+    val sakstype: String = "FAGSAK",
+    val fagsakId: String,
+    val fagsaksystem: String = "KELVIN"
 )

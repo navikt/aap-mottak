@@ -103,8 +103,8 @@ class MottakTopology(
             SECURE_LOG.info("Fant eksisterende sak for person i arena.")
 //            oppgave.opprettManuellJournalføringsoppgave(journalpost)
         } else if (skalTilKelvin(journalpost)) {
-            kelvin.finnEllerOpprettSak(journalpost)
-            joark.oppdaterJournalpost(journalpost, enhet)
+            val saksinfo = kelvin.finnEllerOpprettSak(journalpost)
+            joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer)
         } else {
             sakIkkeFunnet(journalpost, enhet)
         }

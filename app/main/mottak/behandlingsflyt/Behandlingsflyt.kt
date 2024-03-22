@@ -10,8 +10,23 @@ import mottak.Journalpost
 import mottak.http.HttpClientFactory
 import java.time.LocalDate
 
+data class FinnEllerOpprettSak(
+    val ident: String,
+    val søknadsdato: LocalDate,
+)
+
+data class Saksinfo(
+    val saksnummer: String,
+    val periode: Periode
+)
+
+data class Periode(
+    val fom: LocalDate,
+    val tom: LocalDate
+)
+
 interface Behandlingsflyt {
-    fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): String
+    fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): Saksinfo
     fun sendSøknad(sakId: String, journalpostId: Long, søknad: ByteArray)
 }
 
@@ -19,26 +34,21 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
     private val httpClient = HttpClientFactory.default()
     private val host = config.behandlingsflyt.host
 
-    override fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): String {
+    override fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): Saksinfo {
         val ident = when (journalpost.personident) {
             is Ident.Personident -> journalpost.personident.id
             is Ident.Aktørid -> error("AktørID skal være byttet ut med folkeregisteridentifikator på dette tidspunktet")
         }
 
         return runBlocking {
-            httpClient.post("$host/sak") {
+            httpClient.post("$host/api/sak/finnEllerOpprett") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 bearerAuth("token")
-                setBody(FinnEllerOpprettSak(ident, LocalDate.now()))
+                setBody(FinnEllerOpprettSak(ident, journalpost.mottattDato()))
             }.body()
         }
     }
-
-    data class FinnEllerOpprettSak(
-        val personident: String,
-        val mottatt: LocalDate,
-    )
 
     override fun sendSøknad(
         sakId: String,

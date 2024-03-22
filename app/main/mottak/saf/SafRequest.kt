@@ -18,7 +18,7 @@ private const val journalpostId = "\$journalpostId"
 private val journalpost = """
     query($journalpostId: String!) {
       journalpost(journalpostId: $journalpostId) {
-        journalposter {
+        journalpost {
           journalpostId
           tittel
           journalposttype

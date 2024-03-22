@@ -18,7 +18,7 @@ interface Oppgave {
     fun opprettManuellJournalføringsoppgave(journalpost: Journalpost.MedIdent)
     fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent)
     fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet)
-}
+    }
 
 class OppgaveClient(private val config: Config) : Oppgave {
     private val httpClient = HttpClientFactory.default()
@@ -53,10 +53,14 @@ class OppgaveClient(private val config: Config) : Oppgave {
     }
 
     override fun opprettOppgaveForManglendeIdent(journalpost: Journalpost.UtenIdent) {
+        // TODO Vi kan bare overlate dette til Gosys(jfr-mauell) dersom vi finner Avvik, det er Forvaltningsoppgave som skal opprettes, siden det er flere tilfeller enn bare manglende Ident på journalpost.
+
         SECURE_LOG.info("Scanning har ikke klart å lese bruker, manuell behandling")
     }
 
     override fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         TODO("Not yet implemented")
+        // TODO Enhetsnummer 9999 benyttes når det er en autmatisk journalføing. ved oppdattering av journalpost skal status være journalført, enehet 9999 og system som har  oppdattert
+
     }
 }

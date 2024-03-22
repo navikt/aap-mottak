@@ -41,7 +41,7 @@ dependencies {
     testImplementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     testImplementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
-    testImplementation("uk.org.webcompere:system-stubs-jupiter:2.1.3")
+    testImplementation("uk.org.webcompere:system-stubs-jupiter:2.1.6")
 }
 
 repositories {

@@ -58,7 +58,7 @@ class SafClient(private val config: Config) : Saf {
     }
 
     private suspend fun graphqlQuery(query: SafRequest): SafRespons {
-        val token = tokenProvider.getClientCredentialToken(config.gosys.scope)
+        val token = tokenProvider.getClientCredentialToken(config.saf.scope)
         val request = httpClient.post("${config.saf.host}/graphql") {
             accept(ContentType.Application.Json)
             header("Nav-Callid", UUID.randomUUID().toString())
@@ -68,9 +68,11 @@ class SafClient(private val config: Config) : Saf {
         }
 
         val respons = request.body<SafRespons>()
-        if (respons.errors != null) {
-            throw Exception("Feil mot SAF: ${respons.errors}")
+
+        if (respons.hasErrors()) {
+            error("Feil mot SAF: ${respons.errors}")
         }
+
         return respons
     }
 }

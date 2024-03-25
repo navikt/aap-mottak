@@ -26,6 +26,10 @@ private val journalpost = """
             temanavn
             behandlingstema
             behandlingstemanavn
+            relevanteDatoer {
+                dato
+                datotype
+            }
             sak {
                 fagsakId
                 fagsaksystem

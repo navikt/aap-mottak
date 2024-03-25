@@ -1,12 +1,30 @@
 package mottak.enhet
 
+import mottak.Journalpost
+import mottak.pdl.Pdl
 import mottak.pdl.Personopplysninger
 
 class EnhetService(
     private val norg: Norg,
     private val skjerming: Skjerming,
+    private val pdl: Pdl
 ) {
-    fun getNavEnhet(personopplysninger: Personopplysninger): NavEnhet {
+    fun enrichWithNavEnhet(journalpost: Journalpost): Pair<Journalpost, NavEnhet> {
+        return when (journalpost) {
+            is Journalpost.MedIdent -> {
+                val personopplysninger = pdl.hentPersonopplysninger(journalpost.personident)
+                val oppdatertJournalpost = journalpost.copy(personident = personopplysninger.personident)
+                val enhet = oppdatertJournalpost.journalførendeEnhet ?: getNavEnhet(personopplysninger)
+                oppdatertJournalpost to enhet
+            }
+
+            is Journalpost.UtenIdent -> {
+                journalpost to getNavEnhetForFordelingsoppgave()
+            }
+        }
+    }
+
+    private fun getNavEnhet(personopplysninger: Personopplysninger): NavEnhet {
         val erSkjermet = skjerming.isSkjermet(personopplysninger.personident)
 
         val enhetsnrListe = norg.hentArbeidsfordeling(
@@ -20,7 +38,7 @@ class EnhetService(
         return NavEnhet(enhetsnrListe.first().enhetNr)
     }
 
-    fun getNavEnhetForFordelingsoppgave(): NavEnhet {
+    private fun getNavEnhetForFordelingsoppgave(): NavEnhet {
         return NavEnhet("oslo")
     }
 }

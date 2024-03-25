@@ -67,6 +67,6 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
 
     data class Søknad(
         val journalpostId: Long,
-        val søknad: Map<Any, Any>,
+        val søknad: Any,
     )
 }

@@ -34,10 +34,17 @@ object JoarkFake : Joark {
             it.first.journalpostId == journalpostId && it.second == enhet
         }
     }
+
+    fun harFerdigstilt(journalpostId: Long): Boolean {
+        return ferdigstilteJournalposter.any {
+            it.first.journalpostId == journalpostId
+        }
+    }
 }
 
 object BehandlingsflytFake : Behandlingsflyt {
     private val saker = mutableListOf<Journalpost>()
+    private val søknader = mutableListOf<Pair<String, Long>>()
 
     override fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): Saksinfo {
         saker.add(journalpost)
@@ -45,11 +52,17 @@ object BehandlingsflytFake : Behandlingsflyt {
     }
 
     override fun sendSøknad(sakId: String, journalpostId: Long, søknad: ByteArray) {
-        TODO("Not yet implemented")
+        søknader.add(sakId to journalpostId)
     }
 
     fun harOpprettetSak(journalpostId: Long): Boolean {
         return saker.any { it.journalpostId == journalpostId }
+    }
+
+    fun harSendtSøknad(sakId: String, journalpostId: Long): Boolean {
+        return søknader.any {
+            it.first == sakId && it.second == journalpostId
+        }
     }
 }
 
@@ -60,13 +73,14 @@ object SkjermingFake : Skjerming {
 }
 
 object NorgFake : Norg {
+    const val ENHET_NR = "3001"
     override fun hentArbeidsfordeling(
         geografiskOmraade: String,
         skjermet: Boolean,
         gradering: PdlGradering
     ): List<ArbeidsfordelingDtoResponse> {
         return listOf(
-            ArbeidsfordelingDtoResponse(enhetNr = "oslo")
+            ArbeidsfordelingDtoResponse(enhetNr = ENHET_NR)
         )
     }
 }
@@ -118,7 +132,7 @@ object SafFake : Saf {
             erPliktkort = false,
             personident = Ident.Personident("1"),
             status = JournalpostStatus.MOTTATT,
-            journalførendeEnhet = NavEnhet("oslo"),
+            journalførendeEnhet = NavEnhet(NorgFake.ENHET_NR),
             skjemanummer = SKJEMANUMMER_SØKNAD,
             mottattDato = LocalDate.now()
         )
@@ -133,5 +147,4 @@ object PdlFake : Pdl {
             gt = "1234"
         )
     }
-
 }

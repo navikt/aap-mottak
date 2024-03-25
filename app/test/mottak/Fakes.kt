@@ -129,13 +129,17 @@ object SafFake : Saf {
     override fun hentJournalpost(journalpostId: Long): Journalpost {
         return Journalpost.MedIdent(
             journalpostId = 123,
-            erPliktkort = false,
             personident = Ident.Personident("1"),
             status = JournalpostStatus.MOTTATT,
             journalførendeEnhet = NavEnhet(NorgFake.ENHET_NR),
             skjemanummer = SKJEMANUMMER_SØKNAD,
-            mottattDato = LocalDate.now()
+            mottattDato = LocalDate.now(),
+            dokumenter = emptyList()
         )
+    }
+
+    override fun hentJson(journalpostId: Long): ByteArray? {
+        return null
     }
 }
 

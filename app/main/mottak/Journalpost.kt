@@ -11,9 +11,11 @@ const val SKJEMANUMMER_PLIKTKORT = "TODO"
 
 sealed class Journalpost(
     open val journalpostId: Long,
+    open val journalførendeEnhet: NavEnhet?,
     private val status: JournalpostStatus,
     private val skjemanummer: String,
-    private val mottattDato: LocalDate
+    private val mottattDato: LocalDate,
+    private val dokumenter: List<Dokument> = emptyList()
 ) {
     fun erJournalført(): Boolean {
         return status == JournalpostStatus.JOURNALFØRT
@@ -27,31 +29,27 @@ sealed class Journalpost(
 
     fun mottattDato() = mottattDato
 
-    class UtenIdent(
-        journalpostId: Long,
-        status: JournalpostStatus,
-        skjemanummer: String,
-        mottattDato: LocalDate
-    ) : Journalpost(journalpostId, status, skjemanummer, mottattDato)
+    fun finnOriginal(): Dokument? = dokumenter.find {
+        it.variantFormat == "ORIGINAL"
+    }
+
+    data class UtenIdent(
+        override val journalpostId: Long,
+        override val journalførendeEnhet: NavEnhet?,
+        private val status: JournalpostStatus,
+        private val skjemanummer: String,
+        private val mottattDato: LocalDate
+    ) : Journalpost(journalpostId, journalførendeEnhet, status, skjemanummer, mottattDato)
 
     data class MedIdent(
         val personident: Ident,
-        val journalførendeEnhet: NavEnhet?,
         override val journalpostId: Long,
-        private val erPliktkort: Boolean,
-        private val skjemanummer: String,
+        override val journalførendeEnhet: NavEnhet?,
         private val status: JournalpostStatus,
-        private val mottattDato: LocalDate
-    ) : Journalpost(journalpostId, status, skjemanummer, mottattDato) {
-
-        fun erEttersending(): Boolean {
-            return skjemanummer == SKJEMANUMMER_SØKNAD_ETTERSENDING
-        }
-
-        fun erPliktkort(): Boolean {
-            return skjemanummer == SKJEMANUMMER_PLIKTKORT
-        }
-    }
+        private val skjemanummer: String,
+        private val mottattDato: LocalDate,
+        private val dokumenter: List<Dokument>
+    ) : Journalpost(journalpostId, journalførendeEnhet, status, skjemanummer, mottattDato, dokumenter)
 }
 
 sealed class Ident {
@@ -64,3 +62,8 @@ enum class JournalpostStatus {
     JOURNALFØRT,
     UKJENT
 }
+
+data class Dokument(
+    val dokumentInfoId: String,
+    val variantFormat: String
+)

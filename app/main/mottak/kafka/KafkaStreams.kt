@@ -54,6 +54,7 @@ class MottakTopology(
             .filter { it.erSøknad() } // TODO dette er et midlertidig filter for happypath mot Kelvin
             .filter { !it.erJournalført() }
             .map { jp -> enhetService.enrichWithNavEnhet(jp) }
+            .secureLog { info("Mottatt søknad for jp ${it.first.journalpostId} mot enhet ${it.second.nr}") }
             .forEach(::håndterJournalpost)
     }
 
@@ -69,12 +70,15 @@ class MottakTopology(
     }
 
     private fun håndterJournalpostMedIdent(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
-        SECURE_LOG.info("Forsøker å rute journalpost med ident")
+        SECURE_LOG.info("Forsøker å rute journalpost med ident ${journalpost.personident}")
 
         val saksinfo = kelvin.finnEllerOpprettSak(journalpost)
+        SECURE_LOG.info("Opprettet sak i Kelvin med saksnummer ${saksinfo.saksnummer}")
         joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer)
         joark.ferdigstillJournalpost(journalpost, enhet)
-        // TODO: Send søknad til Kelvin
+        saf.hentJson(journalpost.journalpostId)?.let {
+            kelvin.sendSøknad(saksinfo.saksnummer, journalpost.journalpostId, it)
+        }
     }
 
     private fun håndterJournalpostUtenIdent(journalpost: Journalpost.UtenIdent) {

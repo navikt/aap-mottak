@@ -8,6 +8,7 @@ data class FinnEllerOpprettSak(
 )
 
 data class SendSøknad(
-    val journalpostId: Long,
-    val søknad: Any,
+    val saksnummer: String,
+    val journalpostId: String,
+    val søknad: Any
 )

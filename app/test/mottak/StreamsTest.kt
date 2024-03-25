@@ -29,18 +29,7 @@ class StreamsTest {
 
         val journalføringstopic = kafka.testTopic(topics.journalfoering)
         journalføringstopic.produce("1") {
-            JournalfoeringHendelseRecord.newBuilder().apply {
-                hendelsesId = "1"
-                versjon = 1
-                hendelsesType = ""
-                journalpostId = 123L
-                temaGammelt = "AAP"
-                temaNytt = "AAP"
-                journalpostStatus = "MOTTATT"
-                mottaksKanal = "NAV_NO"
-                kanalReferanseId = ""
-                behandlingstema = ""
-            }.build()
+            lagHendelseRecord()
         }
 
         assertTrue(BehandlingsflytFake.harOpprettetSak(123))
@@ -56,18 +45,9 @@ class StreamsTest {
 
         val journalføringstopic = kafka.testTopic(topics.journalfoering)
         journalføringstopic.produce("1") {
-            JournalfoeringHendelseRecord.newBuilder().apply {
-                hendelsesId = "1"
-                versjon = 1
-                hendelsesType = ""
-                journalpostId = 123L
-                temaGammelt = "AAP"
-                temaNytt = "DAG"
-                journalpostStatus = "MOTTATT"
-                mottaksKanal = "NAV_NO"
-                kanalReferanseId = ""
-                behandlingstema = ""
-            }.build()
+            lagHendelseRecord(
+                nyttTema = "DAG"
+            )
         }
 
         assertFalse(BehandlingsflytFake.harOpprettetSak(123))
@@ -97,4 +77,28 @@ class StreamsTest {
 
         return kafka
     }
+
+    private fun lagHendelseRecord(
+        id: String = "1",
+        v: Int = 1,
+        type: String = "",
+        jpId: Long = 123L,
+        gammeltTema: String = "AAP",
+        nyttTema: String = "AAP",
+        jpStatus: String = "MOTTATT",
+        kanal: String = "NAV_NO",
+        kanalRefId: String = "",
+        behandlingTema: String = ""
+    ) = JournalfoeringHendelseRecord.newBuilder().apply {
+        hendelsesId = id
+        versjon = v
+        hendelsesType = type
+        journalpostId = jpId
+        temaGammelt = gammeltTema
+        temaNytt = nyttTema
+        journalpostStatus = jpStatus
+        mottaksKanal = kanal
+        kanalReferanseId = kanalRefId
+        behandlingstema = behandlingTema
+    }.build()
 }

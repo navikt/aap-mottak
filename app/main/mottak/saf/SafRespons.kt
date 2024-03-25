@@ -71,7 +71,7 @@ data class SafJournalpost(
      * En journalpost kan maksimalt være knyttet til èn sak,
      * men et dokument kan være knyttet til fler journalposter og dermed fler saker.
      */
-    val sak: Sak,
+    val sak: Sak? = null,
 
     /**
      * Person eller org som dokumentene i journalposten gjelder.

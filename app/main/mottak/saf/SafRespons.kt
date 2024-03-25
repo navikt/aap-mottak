@@ -345,7 +345,6 @@ data class SafDokumentInfo(
 
 data class SafDokumentvariant(
     val variantformat: SafVariantformat,
-    val brukerHarTilgang: Boolean,
     val filtype: String
 )
 

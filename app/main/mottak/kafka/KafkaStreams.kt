@@ -46,6 +46,7 @@ class MottakTopology(
 
     operator fun invoke(): Topology = topology {
         consume(topics.journalfoering)
+            .secureLog { info("Record -- ID: ${it.journalpostId}, TEMA: ${it.temaNytt}, KANAL: ${it.mottaksKanal}, BEHANDLINGSTEMA: ${it.behandlingstema}") }
             .filter { record -> record.temaNytt == "AAP" }
             .filter { record -> record.journalpostStatus == "MOTTATT" }
             .filter { record -> record.mottaksKanal !in listOf("EESSI") }

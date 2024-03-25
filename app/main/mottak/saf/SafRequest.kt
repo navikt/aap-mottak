@@ -18,7 +18,6 @@ private const val journalpostId = "\$journalpostId"
 private val journalpost = """
     query($journalpostId: String!) {
       journalpost(journalpostId: $journalpostId) {
-        journalpost {
           journalpostId
           tittel
           journalposttype
@@ -44,7 +43,6 @@ private val journalpost = """
             tittel
             brevkode
           }
-        }
       }
     }
 """.trimIndent()

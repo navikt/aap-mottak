@@ -8,22 +8,6 @@ import mottak.Config
 import mottak.Ident
 import mottak.Journalpost
 import mottak.http.HttpClientFactory
-import java.time.LocalDate
-
-data class FinnEllerOpprettSak(
-    val ident: String,
-    val søknadsdato: LocalDate,
-)
-
-data class Saksinfo(
-    val saksnummer: String,
-    val periode: Periode
-)
-
-data class Periode(
-    val fom: LocalDate,
-    val tom: LocalDate
-)
 
 interface Behandlingsflyt {
     fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): Saksinfo
@@ -60,13 +44,8 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 bearerAuth("token")
-                setBody(Søknad(journalpostId, mapOf("søknad" to søknad)))
+                setBody(SendSøknad(journalpostId, mapOf("søknad" to søknad)))
             }
         }
     }
-
-    data class Søknad(
-        val journalpostId: Long,
-        val søknad: Any,
-    )
 }

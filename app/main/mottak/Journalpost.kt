@@ -17,6 +17,8 @@ sealed class Journalpost(
     private val mottattDato: LocalDate,
     private val dokumenter: List<Dokument> = emptyList()
 ) {
+    fun skjemanummer() = skjemanummer
+
     fun erJournalført(): Boolean {
         return status == JournalpostStatus.JOURNALFØRT
     }

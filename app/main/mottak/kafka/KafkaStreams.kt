@@ -52,7 +52,7 @@ class MottakTopology(
             .filter { record -> record.mottaksKanal !in listOf("EESSI") }
             .processor(MeterConsumed(registry))
             .map { record -> saf.hentJournalpost(record.journalpostId) }
-            .secureLog { info("Mappet til journalpost ${it.journalpostId}") }
+            .secureLog { info("Mappet til journalpost ${it.journalpostId} med skjemanummer ${it.skjemanummer()}") }
             .filter { it.erSøknad() } // TODO dette er et midlertidig filter for happypath mot Kelvin
             .secureLog { info("${it.journalpostId} kom gjennom erSøknad filter") }
             .filter { !it.erJournalført() }

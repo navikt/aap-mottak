@@ -54,9 +54,9 @@ class MottakTopology(
             .map { record -> saf.hentJournalpost(record.journalpostId) }
             .secureLog { info("Mappet til journalpost ${it.journalpostId}") }
             .filter { it.erSøknad() } // TODO dette er et midlertidig filter for happypath mot Kelvin
-            .secureLog { info("${it.journalpostId} kom gjennom første filter") }
+            .secureLog { info("${it.journalpostId} kom gjennom erSøknad filter") }
             .filter { !it.erJournalført() }
-            .secureLog { info("${it.journalpostId} kom gjennom første filter") }
+            .secureLog { info("${it.journalpostId} kom gjennom journalført filter") }
             .map { jp -> enhetService.enrichWithNavEnhet(jp) }
             .secureLog { info("Mottatt søknad for jp ${it.first.journalpostId} mot enhet ${it.second.nr}") }
             .forEach(::håndterJournalpost)

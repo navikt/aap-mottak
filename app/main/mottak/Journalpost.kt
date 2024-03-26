@@ -13,20 +13,17 @@ sealed class Journalpost(
     open val journalpostId: Long,
     open val journalførendeEnhet: NavEnhet?,
     private val status: JournalpostStatus,
-    private val skjemanummer: String,
     private val mottattDato: LocalDate,
     private val dokumenter: List<Dokument> = emptyList()
 ) {
-    fun skjemanummer() = skjemanummer
-
     fun erJournalført(): Boolean {
         return status == JournalpostStatus.JOURNALFØRT
     }
 
     fun erSøknad(): Boolean {
-        return skjemanummer in listOf(
-            SKJEMANUMMER_SØKNAD,
-        )
+        return dokumenter.any {
+            it.brevkode == SKJEMANUMMER_SØKNAD
+        }
     }
 
     fun mottattDato() = mottattDato
@@ -39,19 +36,18 @@ sealed class Journalpost(
         override val journalpostId: Long,
         override val journalførendeEnhet: NavEnhet?,
         private val status: JournalpostStatus,
-        private val skjemanummer: String,
-        private val mottattDato: LocalDate
-    ) : Journalpost(journalpostId, journalførendeEnhet, status, skjemanummer, mottattDato)
+        private val mottattDato: LocalDate,
+        private val dokumenter: List<Dokument>
+    ) : Journalpost(journalpostId, journalførendeEnhet, status, mottattDato, dokumenter)
 
     data class MedIdent(
         val personident: Ident,
         override val journalpostId: Long,
         override val journalførendeEnhet: NavEnhet?,
         private val status: JournalpostStatus,
-        private val skjemanummer: String,
         private val mottattDato: LocalDate,
         private val dokumenter: List<Dokument>
-    ) : Journalpost(journalpostId, journalførendeEnhet, status, skjemanummer, mottattDato, dokumenter)
+    ) : Journalpost(journalpostId, journalførendeEnhet, status, mottattDato, dokumenter)
 }
 
 sealed class Ident {
@@ -67,5 +63,6 @@ enum class JournalpostStatus {
 
 data class Dokument(
     val dokumentInfoId: String,
-    val variantFormat: String
+    val variantFormat: String,
+    val brevkode: String?
 )

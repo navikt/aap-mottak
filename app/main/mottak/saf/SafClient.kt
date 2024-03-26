@@ -41,7 +41,7 @@ class SafClient(private val config: Config) : Saf {
 
         val dokumenter = journalpost.dokumenter?.filterNotNull()?.flatMap { dokument ->
             dokument.dokumentvarianter.filterNotNull().map { variant ->
-                Dokument(dokument.dokumentInfoId, variant.variantformat.name)
+                Dokument(dokument.dokumentInfoId, variant.variantformat.name, dokument.brevkode)
             }
         } ?: emptyList()
 
@@ -50,8 +50,8 @@ class SafClient(private val config: Config) : Saf {
                 journalpostId = journalpost.journalpostId,
                 status = JournalpostStatus.UKJENT,
                 journalførendeEnhet = journalpost.journalfoerendeEnhet?.let(::NavEnhet),
-                skjemanummer = "",
-                mottattDato = mottattDato
+                mottattDato = mottattDato,
+                dokumenter = dokumenter
             )
         } else {
             Journalpost.MedIdent(
@@ -59,7 +59,6 @@ class SafClient(private val config: Config) : Saf {
                 personident = ident,
                 status = JournalpostStatus.UKJENT,
                 journalførendeEnhet = journalpost.journalfoerendeEnhet?.let(::NavEnhet),
-                skjemanummer = "",
                 mottattDato = mottattDato,
                 dokumenter = dokumenter
             )

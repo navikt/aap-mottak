@@ -132,9 +132,14 @@ object SafFake : Saf {
             personident = Ident.Personident("1"),
             status = JournalpostStatus.MOTTATT,
             journalførendeEnhet = NavEnhet(NorgFake.ENHET_NR),
-            skjemanummer = SKJEMANUMMER_SØKNAD,
             mottattDato = LocalDate.now(),
-            dokumenter = emptyList()
+            dokumenter = listOf(
+                Dokument(
+                    dokumentInfoId = "1234",
+                    brevkode = SKJEMANUMMER_SØKNAD,
+                    variantFormat = "ORIGINAL"
+                )
+            )
         )
     }
 

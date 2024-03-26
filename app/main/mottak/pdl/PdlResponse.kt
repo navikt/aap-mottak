@@ -32,7 +32,6 @@ data class PdlResponse(
         data class Person(
             val folkeregisteridentifikator: List<FolkeregisterIdentifikator>,
             val adressebeskyttelse: List<Adressebeskyttelse>,
-            val navn: List<Navn>,
         )
 
         data class FolkeregisterIdentifikator(

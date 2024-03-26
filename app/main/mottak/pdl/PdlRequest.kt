@@ -20,6 +20,7 @@ private const val personopplysninger = """
             gtKommune
             gtBydel
             gtLand
+            gtType
         }
         hentPerson(ident: $ident) {
             adressebeskyttelse {

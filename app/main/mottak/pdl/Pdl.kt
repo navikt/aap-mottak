@@ -42,7 +42,7 @@ class PdlClient(private val config: Config) : Pdl {
 
     private fun query(query: PdlRequest): PdlResponse.Data {
         return runBlocking {
-            val token = tokenProvider.getClientCredentialToken(config.gosys.scope)
+            val token = tokenProvider.getClientCredentialToken(config.pdl.scope)
             httpClient.post("$host/graphql") {
                 accept(ContentType.Application.Json)
                 header("Nav-Call-Id", UUID.randomUUID())

@@ -7,7 +7,6 @@ import mottak.Config
 import mottak.http.HttpClientFactory
 import mottak.http.tryInto
 import mottak.pdl.PdlGradering
-import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 import java.net.URI
 
 interface Norg {
@@ -18,10 +17,9 @@ interface Norg {
     ): List<ArbeidsfordelingDtoResponse>
 }
 
-class NorgClient(private val config: Config) : Norg {
+class NorgClient(config: Config) : Norg {
     private val host: URI = config.norg.host
     private val httpClient = HttpClientFactory.default()
-    private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun hentArbeidsfordeling(
         geografiskOmraade: String,
@@ -38,11 +36,9 @@ class NorgClient(private val config: Config) : Norg {
             }
         )
         return runBlocking {
-            val token = tokenProvider.getClientCredentialToken(config.gosys.scope)
             httpClient.post("$host/api/v1/arbeidsfordeling/enheter/bestmatch") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
-                bearerAuth(token)
                 setBody(request)
             }.tryInto()
         }

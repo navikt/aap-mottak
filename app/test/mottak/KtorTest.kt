@@ -109,13 +109,6 @@ internal fun Application.pdlFake() {
                                 PdlResponse.Data.Adressebeskyttelse(
                                     gradering = "UGRADERT"
                                 )
-                            ),
-                            navn = listOf(
-                                PdlResponse.Data.Navn(
-                                    fornavn = "fornavn",
-                                    mellomnavn = "mellomnavn",
-                                    etternavn = "etternavn",
-                                )
                             )
                         ),
                     ),

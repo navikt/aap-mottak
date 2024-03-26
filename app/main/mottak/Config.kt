@@ -63,7 +63,7 @@ data class NorgConfig(
 
 class PdlConfig(
     private val env: Env = getEnv(),
-    val host: URI = "https://pdl-api.$env-fss-pub.nais.io/graphql".let(::URI),
+    val host: URI = "https://pdl-api.$env-fss-pub.nais.io".let(::URI),
     val scope: String = "api://$env-fss.pdl.pdl-api/.default",
 )
 

@@ -58,7 +58,7 @@ data class SkjermingConfig(
 
 data class NorgConfig(
     private val env: Env = getEnv(),
-    val host: URI = "https://norg2.$env-fss-pub.nais.io".let(::URI),
+    val host: URI = "https://norg2.$env-fss-pub.nais.io/norg2".let(::URI),
 )
 
 class PdlConfig(

@@ -17,7 +17,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val SECURE_LOG: Logger = LoggerFactory.getLogger("secureLog")
-val APP_LOG = LoggerFactory.getLogger("App")
 
 fun main() {
     Thread.currentThread().setUncaughtExceptionHandler { _, e -> SECURE_LOG.error("Uhåndtert feil", e) }

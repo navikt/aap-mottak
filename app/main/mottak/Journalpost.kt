@@ -16,8 +16,8 @@ sealed class Journalpost(
     private val mottattDato: LocalDate,
     private val dokumenter: List<Dokument> = emptyList()
 ) {
-    fun erJournalført(): Boolean {
-        return status == JournalpostStatus.JOURNALFØRT
+    fun harFortsattTilstandMottatt(): Boolean {
+        return status == JournalpostStatus.MOTTATT
     }
 
     fun erSøknad(): Boolean {

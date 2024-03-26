@@ -52,13 +52,8 @@ class MottakTopology(
             .filter { record -> record.mottaksKanal !in listOf("EESSI") }
             .processor(MeterConsumed(registry))
             .map { record -> saf.hentJournalpost(record.journalpostId) }
-            .secureLog { info("Mappet til journalpost ${it.journalpostId}") }
-            .filter { it.erSøknad() } // TODO dette er et midlertidig filter for happypath mot Kelvin
-            .secureLog { info("${it.journalpostId} kom gjennom erSøknad filter") }
-            .filter { !it.erJournalført() }
-            .secureLog { info("${it.journalpostId} kom gjennom journalført filter") }
+            .filter { jp -> jp.harFortsattTilstandMottatt() }
             .map { jp -> enhetService.enrichWithNavEnhet(jp) }
-            .secureLog { info("Mottatt søknad for jp ${it.first.journalpostId} mot enhet ${it.second.nr}") }
             .forEach(::håndterJournalpost)
     }
 
@@ -67,6 +62,11 @@ class MottakTopology(
     ) {
         val (journalpost, enhet) = journalpostMedEnhet
 
+        if (!journalpost.erSøknad()) {
+            SECURE_LOG.info("For tiden hopper vi over alt som ikke er søknad (${journalpost.journalpostId}).")
+            return
+        }
+
         when (journalpost) {
             is Journalpost.MedIdent -> håndterJournalpostMedIdent(journalpost, enhet)
             is Journalpost.UtenIdent -> håndterJournalpostUtenIdent(journalpost)
@@ -74,7 +74,7 @@ class MottakTopology(
     }
 
     private fun håndterJournalpostMedIdent(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
-        SECURE_LOG.info("Forsøker å rute journalpost med ident ${journalpost.personident}")
+        SECURE_LOG.info("Forsøker å rute journalpost ${journalpost.journalpostId} med ident")
 
         val saksinfo = kelvin.finnEllerOpprettSak(journalpost)
         SECURE_LOG.info("Opprettet sak i Kelvin med saksnummer ${saksinfo.saksnummer}")

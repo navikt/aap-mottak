@@ -11,7 +11,6 @@ data class PdlRequest(val query: String, val variables: Variables) {
     }
 }
 
-// escape $ in multiline strings
 private const val ident = "\$ident"
 
 private const val personopplysninger = """

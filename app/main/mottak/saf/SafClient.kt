@@ -55,8 +55,8 @@ class SafClient(private val config: Config) : Saf {
             )
         } else {
             Journalpost.MedIdent(
-                journalpostId = journalpost.journalpostId,
                 personident = ident,
+                journalpostId = journalpost.journalpostId,
                 status = JournalpostStatus.UKJENT,
                 journalførendeEnhet = journalpost.journalfoerendeEnhet?.let(::NavEnhet),
                 mottattDato = mottattDato,

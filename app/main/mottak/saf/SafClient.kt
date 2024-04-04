@@ -48,7 +48,7 @@ class SafClient(private val config: Config) : Saf {
         return if (ident == null) {
             Journalpost.UtenIdent(
                 journalpostId = journalpost.journalpostId,
-                status = JournalpostStatus.UKJENT,
+                status = finnJournalpostStatus(journalpost.journalstatus),
                 journalførendeEnhet = journalpost.journalfoerendeEnhet?.let(::NavEnhet),
                 mottattDato = mottattDato,
                 dokumenter = dokumenter
@@ -57,7 +57,7 @@ class SafClient(private val config: Config) : Saf {
             Journalpost.MedIdent(
                 personident = ident,
                 journalpostId = journalpost.journalpostId,
-                status = JournalpostStatus.UKJENT,
+                status = finnJournalpostStatus(journalpost.journalstatus),
                 journalførendeEnhet = journalpost.journalfoerendeEnhet?.let(::NavEnhet),
                 mottattDato = mottattDato,
                 dokumenter = dokumenter
@@ -109,6 +109,13 @@ class SafClient(private val config: Config) : Saf {
             HttpStatusCode.OK -> response.body()
             HttpStatusCode.NotFound -> error("Fant ikke dokument $dokumentId for journalpost $journalpostId")
             else -> error("Feil fra saf: ${response.status} : ${response.bodyAsText()}")
+        }
+    }
+
+    private fun finnJournalpostStatus(status: Journalstatus?): JournalpostStatus {
+        return when(status) {
+            Journalstatus.MOTTATT -> JournalpostStatus.MOTTATT
+            else -> JournalpostStatus.UKJENT
         }
     }
 }

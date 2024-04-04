@@ -17,6 +17,7 @@ sealed class Journalpost(
     private val dokumenter: List<Dokument> = emptyList()
 ) {
     fun harFortsattTilstandMottatt(): Boolean {
+        SECURE_LOG.info("Filter på status: ${status == JournalpostStatus.MOTTATT}")
         return status == JournalpostStatus.MOTTATT
     }
 

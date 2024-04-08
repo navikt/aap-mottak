@@ -25,12 +25,12 @@ class JoarkClient(private val config: Config) : Joark {
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
     override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String) {
-        // TODO: Oppdater med behandlende enhet og fagsak
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.joark.scope)
             val response =
                 httpClient.put("${config.joark.host}/rest/journalpostapi/v1/journalpost/${journalpost.journalpostId}") {
                     accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
                     bearerAuth(token)
                     setBody(OppdaterJournalpostRequest(
                         journalfoerendeEnhet = enhet.nr,
@@ -53,6 +53,7 @@ class JoarkClient(private val config: Config) : Joark {
             val response =
                 httpClient.put("${config.joark.host}/rest/journalpostapi/v1/journalpost/${journalpost.journalpostId}/ferdigstill") {
                     accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
                     bearerAuth(token)
                     setBody(FerdigstillRequest(journalfoerendeEnhet = enhet.nr))
                 }

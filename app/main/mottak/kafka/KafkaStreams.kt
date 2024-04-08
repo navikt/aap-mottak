@@ -82,7 +82,7 @@ class MottakTopology(
         joark.ferdigstillJournalpost(journalpost, enhet)
         saf.hentJson(journalpost.journalpostId)?.let {
             kelvin.sendSøknad(saksinfo.saksnummer, journalpost.journalpostId, it)
-        }
+        } ?: SECURE_LOG.warn("Journalpost ${journalpost.journalpostId} hadde ikke json")
     }
 
     private fun håndterJournalpostUtenIdent(journalpost: Journalpost.UtenIdent) {

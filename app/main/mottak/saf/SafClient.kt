@@ -97,7 +97,7 @@ class SafClient(private val config: Config) : Saf {
     private suspend fun restQuery(
         journalpostId: Long,
         dokumentId: String,
-        arkivtype: String = "ARKIV"
+        arkivtype: String = "ORIGINAL"
     ): ByteArray {
         val token = tokenProvider.getClientCredentialToken(config.saf.scope)
         val response = httpClient.get("${config.saf.host}/rest/hentdokument/$journalpostId/$dokumentId/$arkivtype") {

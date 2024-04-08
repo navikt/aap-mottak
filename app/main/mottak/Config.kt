@@ -47,7 +47,7 @@ data class DokarkivConfig(
     private val env: Env = getEnv(),
     private val fssEnv: String = System.getenv("FSS_ENV") ?: "",
     val host: URI = "https://dokarkiv$fssEnv.$env-fss-pub.nais.io".let(::URI),
-    val scope: String = "api://$env-fss.teamdokumenthandtering.dokarkiv$fssEnv/.default",
+    val scope: String = "api://$env-fss.teamdokumenthandtering.dokarkiv/.default",
 )
 
 data class SkjermingConfig(

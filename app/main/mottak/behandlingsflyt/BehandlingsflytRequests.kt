@@ -10,5 +10,9 @@ data class FinnEllerOpprettSak(
 data class SendSøknad(
     val saksnummer: String,
     val journalpostId: String,
-    val søknad: Any
+    val søknad: Temp = Temp()
+)
+
+data class Temp(
+    val student: Boolean = true
 )

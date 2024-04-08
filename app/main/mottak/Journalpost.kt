@@ -3,11 +3,7 @@ package mottak
 import mottak.enhet.NavEnhet
 import java.time.LocalDate
 
-const val SKJEMANUMMER_SØKNAD = "NAV 11-13.05" // automatisk
-const val SKJEMANUMMER_SØKNAD_ETTERSENDING = "NAVe 11-13.05" // automatisk
-const val SKJEMANUMMER_PLIKTKORT = "TODO"
-// 11-12.05 reisestønad automatisk
-// e11-12.05 ettersendelse reisestønad automatisk
+const val SKJEMANUMMER_SØKNAD = "NAV 11-13.05"
 
 sealed class Journalpost(
     open val journalpostId: Long,
@@ -17,7 +13,6 @@ sealed class Journalpost(
     private val dokumenter: List<Dokument> = emptyList()
 ) {
     fun harFortsattTilstandMottatt(): Boolean {
-        SECURE_LOG.info("Filter på status ($status == ${JournalpostStatus.MOTTATT}): ${status == JournalpostStatus.MOTTATT}")
         return status == JournalpostStatus.MOTTATT
     }
 
@@ -51,9 +46,9 @@ sealed class Journalpost(
     ) : Journalpost(journalpostId, journalførendeEnhet, status, mottattDato, dokumenter)
 }
 
-sealed class Ident(val ident: String) {
-    class Personident(val id: String) : Ident(id)
-    class Aktørid(val id: String) : Ident(id)
+sealed class Ident {
+    class Personident(val id: String) : Ident()
+    class Aktørid(val id: String) : Ident()
 }
 
 enum class JournalpostStatus {

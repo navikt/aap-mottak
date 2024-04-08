@@ -5,6 +5,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import mottak.Config
+import mottak.Ident
 import mottak.Journalpost
 import mottak.SECURE_LOG
 import mottak.enhet.NavEnhet
@@ -12,19 +13,24 @@ import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 interface Joark {
-    fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String, personident: String)
+    fun oppdaterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet, fagsakId: String)
 
     fun ferdigstillJournalpost(journalpost: Journalpost, enhet: NavEnhet)
 }
 
 const val FORDELINGSOPPGAVE = "FDR"
-const val JOURNALORINGSOPPGAVE = "JFR"
+const val JOURNALFORINGSOPPGAVE = "JFR"
 
 class JoarkClient(private val config: Config) : Joark {
     private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String, personident: String) {
+    override fun oppdaterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet, fagsakId: String) {
+        val ident = when (journalpost.personident) {
+            is Ident.Personident -> journalpost.personident.id
+            is Ident.Aktørid -> error("AktørID skal være byttet ut med folkeregisteridentifikator på dette tidspunktet")
+        }
+
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.joark.scope)
             val response =
@@ -38,7 +44,7 @@ class JoarkClient(private val config: Config) : Joark {
                             fagsakId = fagsakId
                         ),
                         bruker = JournalpostBruker(
-                            id = personident
+                            id = ident
                         )
                     ))
                 }

@@ -1,11 +1,13 @@
 package mottak.pdl
 
+import mottak.graphql.asQuery
+
 data class PdlRequest(val query: String, val variables: Variables) {
     data class Variables(val ident: String)
 
     companion object {
         fun hentPersonopplysninger(personident: String) = PdlRequest(
-            query = personopplysninger.replace("\n", ""),
+            query = personopplysninger.asQuery(),
             variables = Variables(personident),
         )
     }

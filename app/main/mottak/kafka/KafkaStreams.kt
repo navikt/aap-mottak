@@ -46,7 +46,6 @@ class MottakTopology(
 
     operator fun invoke(): Topology = topology {
         consume(topics.journalfoering)
-            .secureLog { info("Record -- ID: ${it.journalpostId}, TEMA: ${it.temaNytt}, KANAL: ${it.mottaksKanal}, BEHANDLINGSTEMA: ${it.behandlingstema}") }
             .filter { record -> record.temaNytt == "AAP" }
             .filter { record -> record.journalpostStatus == "MOTTATT" }
             .filter { record -> record.mottaksKanal !in listOf("EESSI") }
@@ -74,18 +73,15 @@ class MottakTopology(
     }
 
     private fun håndterJournalpostMedIdent(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
-        SECURE_LOG.info("Forsøker å rute journalpost ${journalpost.journalpostId} med ident")
-
         val saksinfo = kelvin.finnEllerOpprettSak(journalpost)
-        SECURE_LOG.info("Opprettet sak i Kelvin med saksnummer ${saksinfo.saksnummer}")
-        joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer, journalpost.personident.ident)
+        joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer)
         joark.ferdigstillJournalpost(journalpost, enhet)
         saf.hentJson(journalpost.journalpostId)?.let {
             kelvin.sendSøknad(saksinfo.saksnummer, journalpost.journalpostId, it)
-        } ?: SECURE_LOG.warn("Journalpost ${journalpost.journalpostId} hadde ikke json")
+        } ?: SECURE_LOG.warn("Journalpost ${journalpost.journalpostId} hadde ikke json, men vi gjør ikke noe med det")
     }
 
     private fun håndterJournalpostUtenIdent(journalpost: Journalpost.UtenIdent) {
-        SECURE_LOG.info("Forsøker å rute journalpost ${journalpost.journalpostId} uten ident")
+        SECURE_LOG.info("Gjør forøvrig ikke noe med journalpost (${journalpost.journalpostId}) uten ident")
     }
 }

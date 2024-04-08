@@ -21,7 +21,7 @@ object JoarkFake : Joark {
     private val oppdaterteJournalposter = mutableListOf<Pair<Journalpost, NavEnhet>>()
     private val ferdigstilteJournalposter = mutableListOf<Pair<Journalpost, NavEnhet>>()
 
-    override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String, personident: String) {
+    override fun oppdaterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet, fagsakId: String) {
         oppdaterteJournalposter.add(journalpost to enhet)
     }
 

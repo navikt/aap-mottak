@@ -39,7 +39,7 @@ class EnhetService(
     }
 
     private fun getNavEnhetForFordelingsoppgave(): NavEnhet {
-        return NavEnhet("oslo")
+        return NavEnhet("oslo") // TODO Sett rett her
     }
 }
 

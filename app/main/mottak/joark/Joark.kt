@@ -12,7 +12,7 @@ import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 interface Joark {
-    fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String)
+    fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String, personident: String)
 
     fun ferdigstillJournalpost(journalpost: Journalpost, enhet: NavEnhet)
 }
@@ -24,7 +24,7 @@ class JoarkClient(private val config: Config) : Joark {
     private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String) {
+    override fun oppdaterJournalpost(journalpost: Journalpost, enhet: NavEnhet, fagsakId: String, personident: String) {
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.joark.scope)
             val response =
@@ -36,6 +36,9 @@ class JoarkClient(private val config: Config) : Joark {
                         journalfoerendeEnhet = enhet.nr,
                         sak = JournalpostSak(
                             fagsakId = fagsakId
+                        ),
+                        bruker = JournalpostBruker(
+                            id = personident
                         )
                     ))
                 }
@@ -73,11 +76,18 @@ data class FerdigstillRequest(
 data class OppdaterJournalpostRequest(
     val behandlingstema: String? = null,
     val journalfoerendeEnhet: String,
-    val sak: JournalpostSak
+    val sak: JournalpostSak,
+    val tema: String = "AAP",
+    val bruker: JournalpostBruker
 )
 
 data class JournalpostSak(
     val sakstype: String = "FAGSAK",
     val fagsakId: String,
     val fagsaksystem: String = "KELVIN"
+)
+
+data class JournalpostBruker(
+    val id: String,
+    val idType: String = "FNR"
 )

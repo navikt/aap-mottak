@@ -78,7 +78,7 @@ class MottakTopology(
 
         val saksinfo = kelvin.finnEllerOpprettSak(journalpost)
         SECURE_LOG.info("Opprettet sak i Kelvin med saksnummer ${saksinfo.saksnummer}")
-        joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer)
+        joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer, journalpost.personident.ident)
         joark.ferdigstillJournalpost(journalpost, enhet)
         saf.hentJson(journalpost.journalpostId)?.let {
             kelvin.sendSøknad(saksinfo.saksnummer, journalpost.journalpostId, it)

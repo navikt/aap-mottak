@@ -51,9 +51,9 @@ sealed class Journalpost(
     ) : Journalpost(journalpostId, journalførendeEnhet, status, mottattDato, dokumenter)
 }
 
-sealed class Ident {
-    class Personident(val id: String) : Ident()
-    class Aktørid(val id: String) : Ident()
+sealed class Ident(val ident: String) {
+    class Personident(val id: String) : Ident(id)
+    class Aktørid(val id: String) : Ident(id)
 }
 
 enum class JournalpostStatus {

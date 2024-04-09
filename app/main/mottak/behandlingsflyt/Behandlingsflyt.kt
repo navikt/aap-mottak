@@ -58,7 +58,7 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
         val typeRef: TypeReference<Map<Any, Any>> = object : TypeReference<Map<Any, Any>>() {}
         val map = objectMapper.readValue(søknad, typeRef)
         runBlocking {
-            httpClient.post("$host/api/søknad/send") {
+            httpClient.post("$host/api/soknad/send") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 bearerAuth("token")

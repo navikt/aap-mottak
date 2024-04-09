@@ -61,7 +61,7 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
             httpClient.post("$host/api/soknad/send") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                bearerAuth("token")
+                //bearerAuth("token")
                 setBody(SendSøknad(sakId, journalpostId.toString())) // TODO: Sett map i stedet
             }
         }

@@ -16,6 +16,8 @@ import mottak.Config
 import mottak.Ident
 import mottak.Journalpost
 import mottak.http.HttpClientFactory
+import java.net.URLEncoder
+import java.nio.charset.Charset
 import java.time.LocalDate
 
 interface Behandlingsflyt {
@@ -58,11 +60,7 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
         val typeRef: TypeReference<Map<Any, Any>> = object : TypeReference<Map<Any, Any>>() {}
         val map = objectMapper.readValue(søknad, typeRef)
         runBlocking {
-            httpClient.post {
-                url {
-                    host = behandlingsflytHost.toString()
-                    path("api/søknad/send")
-                }
+            httpClient.post(URLEncoder.encode("$behandlingsflytHost/api/søknad/send", Charset.defaultCharset())) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 //bearerAuth("token") TODO Auth, når behandlingsflyt skrur det på

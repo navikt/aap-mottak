@@ -25,7 +25,7 @@ interface Behandlingsflyt {
 
 class BehandlingsflytClient(config: Config) : Behandlingsflyt {
     private val httpClient = HttpClientFactory.default()
-    private val host = config.behandlingsflyt.host
+    private val behandlingsflytHost = config.behandlingsflyt.host
 
     override fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): Saksinfo {
         val ident = when (journalpost.personident) {
@@ -37,7 +37,7 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
     }
 
     private suspend fun finnEllerOpprett(ident: String, mottattDato: LocalDate): Saksinfo {
-        val response = httpClient.post("$host/api/sak/finnEllerOpprett") {
+        val response = httpClient.post("$behandlingsflytHost/api/sak/finnEllerOpprett") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 //bearerAuth("token") TODO Auth, når behandlingsflyt skrur det på
@@ -58,7 +58,11 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
         val typeRef: TypeReference<Map<Any, Any>> = object : TypeReference<Map<Any, Any>>() {}
         val map = objectMapper.readValue(søknad, typeRef)
         runBlocking {
-            httpClient.post("$host/api/soknad/send") {
+            httpClient.post {
+                url {
+                    host = behandlingsflytHost.toString()
+                    path("api/søknad/send")
+                }
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 //bearerAuth("token") TODO Auth, når behandlingsflyt skrur det på

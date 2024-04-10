@@ -40,7 +40,7 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
         val response = httpClient.post("$host/api/sak/finnEllerOpprett") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                bearerAuth("token")
+                //bearerAuth("token") TODO Auth, når behandlingsflyt skrur det på
                 setBody(FinnEllerOpprettSak(ident, mottattDato))
             }
 
@@ -61,8 +61,8 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
             httpClient.post("$host/api/soknad/send") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                //bearerAuth("token")
-                setBody(SendSøknad(sakId, journalpostId.toString())) // TODO: Sett map i stedet
+                //bearerAuth("token") TODO Auth, når behandlingsflyt skrur det på
+                setBody(SendSøknad(sakId, journalpostId.toString(), map))
             }
         }
     }

@@ -77,6 +77,8 @@ class MottakTopology(
         joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer)
         joark.ferdigstillJournalpost(journalpost, enhet)
         saf.hentJson(journalpost.journalpostId)?.let {
+            // TODO: Hvis prosessen tryner her, så vil ikke melding bli kjørt på nytt fordi den har fått
+            //       status JOURNALFØRT. Finn en lur fiks her...
             kelvin.sendSøknad(saksinfo.saksnummer, journalpost.journalpostId, it)
         } ?: SECURE_LOG.warn("Journalpost ${journalpost.journalpostId} hadde ikke json, men vi gjør ikke noe med det")
     }

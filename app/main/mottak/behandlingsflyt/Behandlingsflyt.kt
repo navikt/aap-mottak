@@ -60,7 +60,7 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
         val typeRef: TypeReference<Map<Any, Any>> = object : TypeReference<Map<Any, Any>>() {}
         val map = objectMapper.readValue(søknad, typeRef)
         runBlocking {
-            httpClient.post(URLEncoder.encode("$behandlingsflytHost/api/søknad/send", Charset.defaultCharset())) {
+            httpClient.post("$behandlingsflytHost/api/soknad/send") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 //bearerAuth("token") TODO Auth, når behandlingsflyt skrur det på

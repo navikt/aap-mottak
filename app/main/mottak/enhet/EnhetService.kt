@@ -1,6 +1,7 @@
 package mottak.enhet
 
 import mottak.Journalpost
+import mottak.SECURE_LOG
 import mottak.pdl.Pdl
 import mottak.pdl.Personopplysninger
 
@@ -33,7 +34,10 @@ class EnhetService(
             gradering = personopplysninger.gradering,
         )
 
-        if (enhetsnrListe.isEmpty()) error("Fant ingen arbeidsfordeling for ${personopplysninger.personident}")
+        if (enhetsnrListe.isEmpty()) {
+            SECURE_LOG.warn("Fant ingen arbeidsfordeling for ${personopplysninger.personident.id}")
+            return getNavEnhetForFordelingsoppgave()
+        }
 
         return NavEnhet(enhetsnrListe.first().enhetNr)
     }

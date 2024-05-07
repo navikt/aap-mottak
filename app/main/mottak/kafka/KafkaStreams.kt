@@ -48,7 +48,7 @@ class MottakTopology(
         consume(topics.journalfoering)
             .filter { record -> record.temaNytt == "AAP" }
             .filter { record -> record.journalpostStatus == "MOTTATT" }
-            .filter { record -> record.mottaksKanal !in listOf("EESSI") }
+            .filter { record -> record.mottaksKanal !in listOf("EESSI") } // TODO: Det bør også snakkes om MELDEKORT og andre som ikke skal håndteres fordi de alt hånteres av andre
             .processor(MeterConsumed(registry))
             .map { record -> saf.hentJournalpost(record.journalpostId) }
             .filter { jp -> jp.harFortsattTilstandMottatt() }

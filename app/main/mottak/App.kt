@@ -59,7 +59,7 @@ fun Application.server(
 
             get("/live") {
                 when (kafka.live()) {
-                    true -> call.respond("live")
+                    true -> call.respond(HttpStatusCode.OK, "live")
                     else -> call.respond(HttpStatusCode.ServiceUnavailable, "Kafka not live")
                 }
             }

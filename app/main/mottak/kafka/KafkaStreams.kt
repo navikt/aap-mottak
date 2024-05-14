@@ -13,8 +13,6 @@ import mottak.behandlingsflyt.Behandlingsflyt
 import mottak.behandlingsflyt.BehandlingsflytClient
 import mottak.enhet.EnhetService
 import mottak.enhet.NavEnhet
-import mottak.enhet.NorgClient
-import mottak.enhet.SkjermingClient
 import mottak.joark.Joark
 import mottak.joark.JoarkClient
 import mottak.pdl.PdlClient
@@ -37,8 +35,6 @@ class MottakTopology(
     private val joark: Joark = JoarkClient(config),
     private val kelvin: Behandlingsflyt = BehandlingsflytClient(config),
     private val enhetService: EnhetService = EnhetService(
-        NorgClient(config),
-        SkjermingClient(config),
         PdlClient(config)
     ),
 ) {
@@ -74,8 +70,8 @@ class MottakTopology(
 
     private fun håndterJournalpostMedIdent(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         val saksinfo = kelvin.finnEllerOpprettSak(journalpost)
-        joark.oppdaterJournalpost(journalpost, enhet, saksinfo.saksnummer)
-        joark.ferdigstillJournalpost(journalpost, enhet)
+        joark.oppdaterJournalpost(journalpost, saksinfo.saksnummer)
+        joark.ferdigstillJournalpost(journalpost)
         saf.hentJson(journalpost.journalpostId)?.let {
             // TODO: Hvis prosessen tryner her, så vil ikke melding bli kjørt på nytt fordi den har fått
             //       status JOURNALFØRT. Finn en lur fiks her...

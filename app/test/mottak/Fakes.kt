@@ -15,18 +15,18 @@ import mottak.pdl.PdlGradering
 import mottak.pdl.Personopplysninger
 import mottak.saf.Saf
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 object JoarkFake : Joark {
     private val oppdaterteJournalposter = mutableListOf<Pair<Journalpost, NavEnhet>>()
     private val ferdigstilteJournalposter = mutableListOf<Pair<Journalpost, NavEnhet>>()
 
-    override fun oppdaterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet, fagsakId: String) {
-        oppdaterteJournalposter.add(journalpost to enhet)
+    override fun oppdaterJournalpost(journalpost: Journalpost.MedIdent, fagsakId: String) {
+        oppdaterteJournalposter.add(journalpost to NavEnhet("9999"))
     }
 
-    override fun ferdigstillJournalpost(journalpost: Journalpost, enhet: NavEnhet) {
-        ferdigstilteJournalposter.add(journalpost to enhet)
+    override fun ferdigstillJournalpost(journalpost: Journalpost) {
+        ferdigstilteJournalposter.add(journalpost to NavEnhet("9999"))
     }
 
     fun harOppdatert(journalpostId: Long, enhet: NavEnhet): Boolean {

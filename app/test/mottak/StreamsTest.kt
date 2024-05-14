@@ -33,7 +33,7 @@ class StreamsTest {
         }
 
         assertTrue(BehandlingsflytFake.harOpprettetSak(123))
-        assertTrue(JoarkFake.harOppdatert(123, NavEnhet(NorgFake.ENHET_NR)))
+        assertTrue(JoarkFake.harOppdatert(123, NavEnhet("9999")))
         assertTrue(JoarkFake.harFerdigstilt(123))
     }
 
@@ -63,8 +63,6 @@ class StreamsTest {
             JoarkFake,
             BehandlingsflytFake,
             EnhetService(
-                NorgFake,
-                SkjermingFake,
                 PdlFake
             ),
         )

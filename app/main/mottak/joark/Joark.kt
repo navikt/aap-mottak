@@ -1,31 +1,38 @@
 package mottak.joark
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.request.accept
+import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.patch
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import mottak.Config
 import mottak.Ident
 import mottak.Journalpost
 import mottak.SECURE_LOG
-import mottak.enhet.NavEnhet
 import mottak.http.HttpClientFactory
 import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 
 interface Joark {
-    fun oppdaterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet, fagsakId: String)
+    fun oppdaterJournalpost(journalpost: Journalpost.MedIdent, fagsakId: String)
 
-    fun ferdigstillJournalpost(journalpost: Journalpost, enhet: NavEnhet)
+    fun ferdigstillJournalpost(journalpost: Journalpost)
 }
 
 const val FORDELINGSOPPGAVE = "FDR"
 const val JOURNALFORINGSOPPGAVE = "JFR"
 
+private const val MASKINELL_JOURNALFØRING_ENHET = "9999"
+
 class JoarkClient(private val config: Config) : Joark {
     private val httpClient = HttpClientFactory.default()
     private val tokenProvider = AzureAdTokenProvider(config.azure, httpClient)
 
-    override fun oppdaterJournalpost(journalpost: Journalpost.MedIdent, enhet: NavEnhet, fagsakId: String) {
+    override fun oppdaterJournalpost(journalpost: Journalpost.MedIdent, fagsakId: String) {
         val ident = when (journalpost.personident) {
             is Ident.Personident -> journalpost.personident.id
             is Ident.Aktørid -> error("AktørID skal være byttet ut med folkeregisteridentifikator på dette tidspunktet")
@@ -39,7 +46,7 @@ class JoarkClient(private val config: Config) : Joark {
                     contentType(ContentType.Application.Json)
                     bearerAuth(token)
                     setBody(OppdaterJournalpostRequest(
-                        journalfoerendeEnhet = enhet.nr,
+                        journalfoerendeEnhet = MASKINELL_JOURNALFØRING_ENHET,
                         sak = JournalpostSak(
                             fagsakId = fagsakId
                         ),
@@ -56,7 +63,7 @@ class JoarkClient(private val config: Config) : Joark {
         }
     }
 
-    override fun ferdigstillJournalpost(journalpost: Journalpost, enhet: NavEnhet) {
+    override fun ferdigstillJournalpost(journalpost: Journalpost) {
         runBlocking {
             val token = tokenProvider.getClientCredentialToken(config.joark.scope)
             val response =
@@ -64,7 +71,7 @@ class JoarkClient(private val config: Config) : Joark {
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                     bearerAuth(token)
-                    setBody(FerdigstillRequest(journalfoerendeEnhet = enhet.nr))
+                    setBody(FerdigstillRequest(journalfoerendeEnhet = MASKINELL_JOURNALFØRING_ENHET))
                 }
             if (response.status.isSuccess()) {
                 SECURE_LOG.info("Ferdigstilt journalpost ${journalpost.journalpostId}")

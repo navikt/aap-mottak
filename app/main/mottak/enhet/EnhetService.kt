@@ -7,9 +7,7 @@ class EnhetService(private val pdl: Pdl) {
     fun enrichWithNavEnhet(journalpost: Journalpost): Pair<Journalpost, NavEnhet> {
         return when (journalpost) {
             is Journalpost.MedIdent -> {
-                val personopplysninger = pdl.hentPersonopplysninger(journalpost.personident)
-                val oppdatertJournalpost = journalpost.copy(personident = personopplysninger.personident)
-                oppdatertJournalpost to NavEnhet("9999")
+                journalpost to NavEnhet("9999")
             }
 
             is Journalpost.UtenIdent -> {

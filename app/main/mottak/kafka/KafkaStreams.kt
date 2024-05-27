@@ -51,6 +51,7 @@ class MottakTopology(
     private fun håndterJournalpost(
         journalpost: Journalpost,
     ) {
+        log.info("Mottatt ${journalpost.journalpostId}, forsøker håndtere.")
         if (!journalpost.erSøknad()) {
             log.info("For tiden hopper vi over alt som ikke er søknad (${journalpost.journalpostId}).")
             return

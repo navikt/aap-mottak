@@ -8,16 +8,13 @@ import libs.kafka.processor.ProcessorMetadata
 import libs.kafka.topology
 import mottak.Config
 import mottak.Journalpost
-import mottak.SECURE_LOG
 import mottak.behandlingsflyt.Behandlingsflyt
 import mottak.behandlingsflyt.BehandlingsflytClient
-import mottak.enhet.EnhetService
-import mottak.enhet.NavEnhet
 import mottak.joark.Joark
 import mottak.joark.JoarkClient
-import mottak.pdl.PdlClient
 import mottak.saf.Saf
 import mottak.saf.SafClient
+import org.slf4j.LoggerFactory
 
 class MeterConsumed<T>(
     private val registry: MeterRegistry,
@@ -28,15 +25,15 @@ class MeterConsumed<T>(
     }
 }
 
+private val log = LoggerFactory.getLogger(MottakTopology::class.java)
+
+
 class MottakTopology(
     config: Config,
     private val registry: MeterRegistry,
     private val saf: Saf = SafClient(config),
     private val joark: Joark = JoarkClient(config),
     private val kelvin: Behandlingsflyt = BehandlingsflytClient(config),
-    private val enhetService: EnhetService = EnhetService(
-        PdlClient(config)
-    ),
 ) {
     private val topics = Topics(config.kafka)
 
@@ -48,27 +45,24 @@ class MottakTopology(
             .processor(MeterConsumed(registry))
             .map { record -> saf.hentJournalpost(record.journalpostId) }
             .filter { jp -> jp.harFortsattTilstandMottatt() }
-            .map { jp -> enhetService.enrichWithNavEnhet(jp) }
             .forEach(::håndterJournalpost)
     }
 
     private fun håndterJournalpost(
-        journalpostMedEnhet: Pair<Journalpost, NavEnhet>,
+        journalpost: Journalpost,
     ) {
-        val (journalpost, enhet) = journalpostMedEnhet
-
         if (!journalpost.erSøknad()) {
-            SECURE_LOG.info("For tiden hopper vi over alt som ikke er søknad (${journalpost.journalpostId}).")
+            log.info("For tiden hopper vi over alt som ikke er søknad (${journalpost.journalpostId}).")
             return
         }
 
         when (journalpost) {
-            is Journalpost.MedIdent -> håndterJournalpostMedIdent(journalpost, enhet)
+            is Journalpost.MedIdent -> håndterJournalpostMedIdent(journalpost)
             is Journalpost.UtenIdent -> håndterJournalpostUtenIdent(journalpost)
         }
     }
 
-    private fun håndterJournalpostMedIdent(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
+    private fun håndterJournalpostMedIdent(journalpost: Journalpost.MedIdent) {
         val saksinfo = kelvin.finnEllerOpprettSak(journalpost)
         joark.oppdaterJournalpost(journalpost, saksinfo.saksnummer)
         joark.ferdigstillJournalpost(journalpost)
@@ -76,10 +70,14 @@ class MottakTopology(
             // TODO: Hvis prosessen tryner her, så vil ikke melding bli kjørt på nytt fordi den har fått
             //       status JOURNALFØRT. Finn en lur fiks her...
             kelvin.sendSøknad(saksinfo.saksnummer, journalpost.journalpostId, it)
-        } ?: SECURE_LOG.warn("Journalpost ${journalpost.journalpostId} hadde ikke json, men vi gjør ikke noe med det")
+        } ?: loggFeilhåndtering(journalpost)
+    }
+
+    private fun loggFeilhåndtering(journalpost: Journalpost.MedIdent) {
+        log.warn("Journalpost ${journalpost.journalpostId} hadde ikke json, men vi gjør ikke noe med det")
     }
 
     private fun håndterJournalpostUtenIdent(journalpost: Journalpost.UtenIdent) {
-        SECURE_LOG.info("Gjør forøvrig ikke noe med journalpost (${journalpost.journalpostId}) uten ident")
+        log.info("Gjør forøvrig ikke noe med journalpost (${journalpost.journalpostId}) uten ident")
     }
 }

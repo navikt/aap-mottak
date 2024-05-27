@@ -3,12 +3,12 @@ package mottak.saf
 import mottak.graphql.asQuery
 
 internal data class SafRequest(val query: String, val variables: Variables) {
-    data class Variables(val journalpostId: Long? = null)
+    data class Variables(val journalpostId: String? = null)
 
     companion object {
         fun hentJournalpost(journalpostId: Long) = SafRequest(
             query = journalpost.asQuery(),
-            variables = Variables(journalpostId = journalpostId)
+            variables = Variables(journalpostId = journalpostId.toString())
         )
     }
 }

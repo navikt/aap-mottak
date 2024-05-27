@@ -22,10 +22,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val SECURE_LOG: Logger = LoggerFactory.getLogger("secureLog")
+private val log = LoggerFactory.getLogger("no.nav.mottak.App")
 
 fun main() {
-    Thread.currentThread().setUncaughtExceptionHandler { _, e -> SECURE_LOG.error("Uhåndtert feil", e) }
+    Thread.currentThread().setUncaughtExceptionHandler { _, e -> loggUventetFeil(e) }
     embeddedServer(Netty, port = 8080, module = Application::server).start(wait = true)
+}
+
+private fun loggUventetFeil(e: Throwable?) {
+    log.error("Uhåndter feil", e)
+    SECURE_LOG.error("Uhåndtert feil", e)
 }
 
 fun Application.server(

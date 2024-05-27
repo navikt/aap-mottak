@@ -2,7 +2,6 @@ package mottak
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import lib.kafka.StreamsMock
-import mottak.enhet.EnhetService
 import mottak.enhet.NavEnhet
 import mottak.kafka.MottakTopology
 import mottak.kafka.Topics
@@ -62,9 +61,6 @@ class StreamsTest {
             SafFake,
             JoarkFake,
             BehandlingsflytFake,
-            EnhetService(
-                PdlFake
-            ),
         )
 
         kafka.connect(

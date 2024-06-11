@@ -21,7 +21,7 @@ open class Config(
 data class BehandlingflytConfig(
     private val env: Env = getEnv(),
     val host: URI = "http://behandlingsflyt".let(::URI),
-    val scope: String = "api://$env-gcp.nom.skjermede-personer-pip/.default",
+    val scope: String = "api://$env-gcp.aap.behandlingsflyt/.default",
 )
 
 data class FssProxyConfig(

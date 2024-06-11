@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -16,8 +17,7 @@ import mottak.Config
 import mottak.Ident
 import mottak.Journalpost
 import mottak.http.HttpClientFactory
-import java.net.URLEncoder
-import java.nio.charset.Charset
+import no.nav.aap.ktor.client.auth.azure.AzureAdTokenProvider
 import java.time.LocalDate
 
 interface Behandlingsflyt {
@@ -28,6 +28,8 @@ interface Behandlingsflyt {
 class BehandlingsflytClient(config: Config) : Behandlingsflyt {
     private val httpClient = HttpClientFactory.default()
     private val behandlingsflytHost = config.behandlingsflyt.host
+    private val behandlingsflytScope = config.behandlingsflyt.scope
+    private val azure = AzureAdTokenProvider(config.azure)
 
     override fun finnEllerOpprettSak(journalpost: Journalpost.MedIdent): Saksinfo {
         val ident = when (journalpost.personident) {
@@ -39,14 +41,15 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
     }
 
     private suspend fun finnEllerOpprett(ident: String, mottattDato: LocalDate): Saksinfo {
+        val token = azure.getClientCredentialToken(behandlingsflytScope)
         val response = httpClient.post("$behandlingsflytHost/api/sak/finnEllerOpprett") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                //bearerAuth("token") TODO Auth, når behandlingsflyt skrur det på
-                setBody(FinnEllerOpprettSak(ident, mottattDato))
-            }
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            bearerAuth(token)
+            setBody(FinnEllerOpprettSak(ident, mottattDato))
+        }
 
-        return when(response.status) {
+        return when (response.status) {
             HttpStatusCode.OK -> response.body()
             else -> error("Feil fra behandlingsflyt: ${response.status} : ${response.bodyAsText()}")
         }
@@ -57,13 +60,13 @@ class BehandlingsflytClient(config: Config) : Behandlingsflyt {
         journalpostId: Long,
         søknad: ByteArray,
     ) {
-        val typeRef: TypeReference<Map<Any, Any>> = object : TypeReference<Map<Any, Any>>() {}
-        val map = objectMapper.readValue(søknad, typeRef)
+        val map = objectMapper.readValue<Map<Any, Any>>(søknad)
         runBlocking {
+            val token = azure.getClientCredentialToken(behandlingsflytScope)
             httpClient.post("$behandlingsflytHost/api/soknad/send") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                //bearerAuth("token") TODO Auth, når behandlingsflyt skrur det på
+                bearerAuth(token)
                 setBody(SendSøknad(sakId, journalpostId.toString(), map))
             }
         }

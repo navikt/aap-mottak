@@ -61,6 +61,7 @@ class OppgaveClient(private val config: Config) : Oppgave {
     override fun opprettAutomatiskJournalføringsoppgave(journalpost: Journalpost.MedIdent, enhet: NavEnhet) {
         TODO("Not yet implemented")
         // TODO Enhetsnummer 9999 benyttes når det er en autmatisk journalføing. ved oppdattering av journalpost skal status være journalført, enehet 9999 og system som har  oppdattert
-
+        //        Dersom en NAV-ansatt er med i journalføringen på noen som helst måte så er det denne ansattes enhet som skal settes.
+        //        Dersom ingen ansatte er involvert så er det 9999 som skal settes
     }
 }

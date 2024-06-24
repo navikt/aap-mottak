@@ -4,7 +4,7 @@ plugins {
 }
 
 val aapLibVersion = "5.0.21"
-val ktorVersion = "2.3.11"
+val ktorVersion = "2.3.12"
 
 application {
     mainClass.set("mottak.AppKt")

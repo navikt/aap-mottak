@@ -28,7 +28,7 @@ class SafClient(private val config: Config) : Saf {
             ?: error("Fant ikke journalpost for $journalpostId")
 
         val ident = when (journalpost.bruker?.type) {
-            BrukerIdType.AKTOERID -> Ident.Aktørid(journalpost.bruker.id!!)
+            BrukerIdType.AKTOERID -> null //Ident.Aktørid(journalpost.bruker.id!!) //TODO: Må håndtere aktørid bittelitt mer fornuftig
             BrukerIdType.FNR -> Ident.Personident(journalpost.bruker.id!!)
             else -> null.also {
                 SECURE_LOG.warn("mottok noe annet enn personnr: ${journalpost.bruker?.type}")

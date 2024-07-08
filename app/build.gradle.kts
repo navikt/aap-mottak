@@ -31,7 +31,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:1.13.1")
     implementation("ch.qos.logback:logback-classic:1.5.6")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
 
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.4")
 
@@ -40,7 +40,7 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     testImplementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
+    testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
     testImplementation("uk.org.webcompere:system-stubs-jupiter:2.1.6")
 }
 
